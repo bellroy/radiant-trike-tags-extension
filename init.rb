@@ -1,0 +1,1 @@
+require 'trike_tags'
