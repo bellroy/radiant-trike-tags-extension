@@ -78,8 +78,12 @@ module TrikeTags
     <pre><code><r:img src="image_source" [other attributes...] /></code></pre>
   }
   tag 'img' do |tag|
+    unless tag.attributes.keys.include?("src")
+      raise StandardTags::TagError.new("`img' tag must contain a `src' attribute.")
+    end
     options = tag.attr.dup
     src = options['src'] ? "#{options.delete('src')}" : ''
+    src.sub!(/^\/?/,'/')
     attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
     attributes = " #{attributes}" unless attributes.empty?
     %{<img src="http://images.#{tag.render('host')}#{src}"#{attributes} />}
@@ -108,7 +112,7 @@ module TrikeTags
     by = (tag.attr['by'] || 'published_at').strip
 
     unless current.attributes.keys.include?(by)
-      raise TagError.new("`by' attribute of `#{flag}' tag must be set to a valid page attribute name")
+      raise StandardTags::TagError.new("`by' attribute of `#{flag}' tag must be set to a valid page attribute name.")
     end
     # get the page's siblings, exclude any that have nil 
     # for the sorting attribute, exclude virtual pages,
