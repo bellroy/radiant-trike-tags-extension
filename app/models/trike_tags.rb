@@ -66,8 +66,9 @@ module TrikeTags
     host_part = Page.root.part('host')
     if host_part
       host_part.content.sub(/\/?$/,'').sub(/^https?:\/\//,'')
-    else
-      env_table(tag)['REQUEST_URI'].sub(/http:\/\//,'')
+    else  # attempt to get it from the request, which is flakey
+      (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
+        "`host' tag requires the root page to have a `host' page part that contains the hostname."))
     end
   end
 
@@ -78,15 +79,20 @@ module TrikeTags
     <pre><code><r:img src="image_source" [other attributes...] /></code></pre>
   }
   tag 'img' do |tag|
-    unless tag.attributes.keys.include?("src")
-      raise StandardTags::TagError.new("`img' tag must contain a `src' attribute.")
-    end
+    # unless tag.attributes && tag.attributes.keys && tag.attributes.include?("src")
+    #   raise StandardTags::TagError.new("`img' tag must contain a `src' attribute.")
+    # end
     options = tag.attr.dup
     src = options['src'] ? "#{options.delete('src')}" : ''
     src.sub!(/^\/?/,'/')
     attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
     attributes = " #{attributes}" unless attributes.empty?
-    %{<img src="http://images.#{tag.render('host')}#{src}"#{attributes} />}
+    begin
+      %{<img src="http://images.#{tag.render('host')}#{src}"#{attributes} />}
+    rescue StandardTags::TagError => e
+      e.message.sub!(/`host' tag/, "`img' tag")
+      raise e
+    end
   end
 
   # <r:modification_date />
@@ -130,6 +136,6 @@ module TrikeTags
   end
 
   def env_table(tag)
-    tag.locals.page.instance_values["behavior"].instance_values['request'].instance_values['cgi'].instance_values['env_table']
+    (a = tag.locals.page.instance_values["behavior"]) && (b = a.instance_values['request']) && (c = b.instance_values['cgi']) && c.instance_values['env_table'] || {}
   end
 end

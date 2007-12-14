@@ -74,13 +74,25 @@ class TrikeTagsTest < Test::Unit::TestCase
   # end
 
   # host
-  def test_that_host_returns_the_host_page_part_from_site_root_if_that_exists
+  def test_that_host_renders_the_host_page_part_from_site_root_if_that_exists
     part = stub(:content => "example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
     Page.stubs(:root).returns(root_page)
 
     assert_parse_output("example.com", "<r:host />")
+  end
+  def test_that_host_renders_a_helpful_error_if_root_host_part_not_found
+    root_page = stub()
+    root_page.stubs(:part).with("host").returns(nil)
+    Page.stubs(:root).returns(root_page)
+
+    begin
+      @parser.parse('<r:host />')
+    rescue StandardTags::TagError => e
+      assert e.message.match(/host.{1,3} tag/), "tag error doesn't mention 'host tag'"
+      assert e.message.match(/root page/), "tag error doesn't mention 'root page'"
+    end
   end
 
   # full_url
@@ -107,6 +119,18 @@ class TrikeTagsTest < Test::Unit::TestCase
       '<img src="http://images.example.com/dir/img.jpg" attr="arbitrary" />',
       '<r:img src="/dir/img.jpg" attr="arbitrary" />'
                        )
+  end
+  def test_that_img_renders_a_helpful_error_if_root_host_part_not_found
+    root_page = stub()
+    root_page.stubs(:part).with("host").returns(nil)
+    Page.stubs(:root).returns(root_page)
+
+    begin
+      @parser.parse('<r:img src="/dir/img.jpg" attr="arbitrary" />')
+    rescue StandardTags::TagError => e
+      assert e.message.match(/img.{1,3} tag/), "tag error doesn't mention 'img tag'"
+      assert e.message.match(/root page/), "tag error doesn't mention 'root page'"
+    end
   end
 
   # updated_at
