@@ -102,6 +102,25 @@ module TrikeTags
     tag.locals.page.updated_at.xmlschema
   end
 
+  desc %{
+    Page attribute tags inside this tag refer to the current page's ancestor who is a child of the site root.
+    
+    *Usage:*
+    <pre><code><r:section_root>...</r:section_root></code></pre>
+  }
+  tag "section_root" do |tag|
+    ancestors = tag.locals.page.ancestors
+    section_root = if ancestors.size == 1
+                     tag.locals.page
+                   elsif ancestors.size > 1
+                     ancestors[-2]
+                   else
+                     nil
+                   end
+    tag.locals.page = section_root
+    tag.expand if section_root
+  end
+
   private
 
   # kudos to http://seansantry.com/projects/blogtags/ for the inspiration

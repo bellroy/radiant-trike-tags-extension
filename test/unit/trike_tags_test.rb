@@ -141,6 +141,33 @@ class TrikeTagsTest < Test::Unit::TestCase
     assert_parse_output(a_time_string, "<r:updated_at />")
   end
 
+  # section_root
+  def test_that_section_root_tag_places_you_in_the_context_of_your_ancestral_root_child
+    root = @page
+    make_kids!(root, *%w[great_uncle great_aunt])
+    grandparent = make_kid!(root, "grandparent")
+    dad = make_kid!(grandparent, "dad")
+    setup_page(make_kid!(dad, "me"))
+
+    assert_parse_output("grandparent", "<r:section_root><r:title /></r:section_root>",
+                        "Couldn't find grandparent.")
+
+    setup_page(dad)
+
+    assert_parse_output("grandparent", "<r:section_root><r:title /></r:section_root>",
+                        "Couldn't find parent.")
+  end
+  def test_that_section_root_returns_nothing_if_on_root_page
+    assert_parse_output("", "<r:section_root><r:title /></r:section_root>")
+  end
+  def test_that_section_root_returns_self_if_on_section_page
+    root = @page
+    make_kids!(root, *%w[bro sis])
+    setup_page(make_kid!(root, "me"))
+
+    assert_parse_output("me", "<r:section_root><r:title /></r:section_root>", "Couldn't find self.")
+  end
+
   private
 
   def with(value)
@@ -156,9 +183,9 @@ class TrikeTagsTest < Test::Unit::TestCase
     @page
   end
 
-  def assert_parse_output(expected, input)
+  def assert_parse_output(expected, input, msg=nil)
     output = @parser.parse(input)
-    assert_equal expected, output
+    assert_equal expected, output, msg
   end
 
   def make_page!(title)
