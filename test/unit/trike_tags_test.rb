@@ -1,7 +1,5 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
-%w[ruby-debug mocha].each {|l| require l }
-
 class TrikeTagsTest < Test::Unit::TestCase
 
   def setup

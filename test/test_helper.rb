@@ -14,5 +14,5 @@ class Test::Unit::TestCase
   self.fixture_path << File.dirname(__FILE__) + "/fixtures"
   
   # Add more helper methods to be used by all extension tests here...
-  
+  %w[ruby-debug mocha].each {|l| require l }
 end
