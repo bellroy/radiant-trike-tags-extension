@@ -65,7 +65,7 @@ module TrikeTags
   tag 'host' do |tag|
     host_part = Page.root.part('host')
     if host_part
-      host_part.content.sub(/\/?$/,'').sub(/^https?:\/\//,'')
+      host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'')
     else  # attempt to get it from the request, which is flakey
       (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
         "`host' tag requires the root page to have a `host' page part that contains the hostname."))
@@ -88,7 +88,7 @@ module TrikeTags
     attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
     attributes = " #{attributes}" unless attributes.empty?
     begin
-      %{<img src="http://images.#{tag.render('host')}#{src}"#{attributes} />}
+      %{<img src="http://images.#{tag.render('host').sub(/^www\./,'')}#{src}"#{attributes} />}
     rescue StandardTags::TagError => e
       e.message.sub!(/`host' tag/, "`img' tag")
       raise e

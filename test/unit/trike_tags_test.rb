@@ -118,6 +118,17 @@ class TrikeTagsTest < Test::Unit::TestCase
       '<r:img src="/dir/img.jpg" attr="arbitrary" />'
                        )
   end
+  def test_that_img_removes_any_www
+    part = stub(:content => "www.example.com")
+    root_page = stub()
+    root_page.stubs(:part).with("host").returns(part)
+    Page.stubs(:root).returns(root_page)
+
+    assert_parse_output(
+      '<img src="http://images.example.com/dir/img.jpg" attr="arbitrary" />',
+      '<r:img src="/dir/img.jpg" attr="arbitrary" />'
+                       )
+  end
   def test_that_img_renders_a_helpful_error_if_root_host_part_not_found
     root_page = stub()
     root_page.stubs(:part).with("host").returns(nil)
