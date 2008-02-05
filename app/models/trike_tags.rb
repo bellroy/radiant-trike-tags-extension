@@ -53,7 +53,8 @@ module TrikeTags
   # Full url, including the http://
   tag "full_url" do |tag|
     host = tag.render("host")
-    "http://#{host}#{tag.render("url")}"
+    url  = tag.render("url")
+    "http://#{host}#{url}"
   end
 
   desc %{ 
@@ -63,13 +64,20 @@ module TrikeTags
     <pre><code><r:host /></code></pre>
   }
   tag 'host' do |tag|
+    if tag.locals.page.respond_to?(:site) && tag.locals.page.site
+      # multi_site extension is running
+      tag.locals.page.site.base_domain
+    elsif (request = tag.globals.page.request) && request.host
+      request.host
+    else
     host_part = Page.root.part('host')
     if host_part
-      host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'')
+        host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
     else  # attempt to get it from the request, which is flakey
       (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
         "`host' tag requires the root page to have a `host' page part that contains the hostname."))
     end
+  end
   end
 
   desc %{ 

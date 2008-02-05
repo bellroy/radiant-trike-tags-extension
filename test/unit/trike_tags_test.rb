@@ -28,9 +28,16 @@ class TrikeTagsTest < Test::Unit::TestCase
     assert_parse_output("<a href=\"/other_page\">Other Page</a>",
       "<r:link_with_current href=\"/other_page\">Other Page</r:link_with_current>")
   end
-  def test_that_link_with_current_returns_a_class_current_link_when_linking_to_self
+  def test_that_link_with_current_returns_a_class_current_link_when_linking_to_self_at_root_page
     assert_parse_output("<a href=\"/\" class=\"current\">Tester</a>",
       "<r:link_with_current href=\"/\">Tester</r:link_with_current>")
+  end
+  def test_that_link_with_current_returns_a_class_current_link_when_linking_to_self
+    setup_page(make_page!("Kid1"))
+    debugger
+
+    assert_parse_output("<a href=\"/kid1\" class=\"current\">Tester</a>",
+      "<r:link_with_current href=\"/kid1\">Tester</r:link_with_current>")
   end
   def test_that_link_with_current_returns_a_class_current_link_when_linking_with_trailing_slash_to_self
     setup_page(make_page!("Kid1"))
@@ -72,6 +79,23 @@ class TrikeTagsTest < Test::Unit::TestCase
   # end
 
   # host
+#    if tag.locals.page.respond_to?(:site)
+#      # multi_site extension is running
+#      tag.locals.page.site.base_domain
+#    elsif (request = tag.globals.page.request) && request.host
+#      request.host
+#    else
+#      host_part = Page.root.part('host')
+#      if host_part
+#        host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
+#      else  # attempt to get it from the request, which is flakey
+#        (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
+#          "`host' tag requires the root page to have a `host' page part that contains the hostname."))
+#      end
+#    end
+  def test_that_host_renders_from_response_if_that_is_defined
+    flunk
+  end
   def test_that_host_renders_the_host_page_part_from_site_root_if_that_exists
     part = stub(:content => "example.com")
     root_page = stub()
