@@ -70,35 +70,50 @@ module TrikeTags
     elsif (request = tag.globals.page.request) && request.host
       request.host
     else
-    host_part = Page.root.part('host')
-    if host_part
+      host_part = Page.root.part('host')
+      if host_part
         host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
-    else  # attempt to get it from the request, which is flakey
-      (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
+      else  # attempt to get it from the request, which is flakey
+        (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
         "`host' tag requires the root page to have a `host' page part that contains the hostname."))
+      end
     end
-  end
   end
 
   desc %{ 
-    Injects "http://images.{{host}}" into a normal img tag.
+    images.{{host}} (removing any www.)
+
+    *Usage:*
+    <pre><code><r:img_host /></code></pre>
+  }
+  tag 'img_host' do |tag|
+    begin
+      %{images.#{tag.render('host').sub(/^www\./,'')}}
+    rescue StandardTags::TagError => e
+      e.message.sub!(/`host' tag/, "`img_host' tag")
+      raise e
+    end
+  end
+
+  desc %{ 
+    Injects "http://images.{{host}}/{{src}}" into a normal img tag.
 
     *Usage:*
     <pre><code><r:img src="image_source" [other attributes...] /></code></pre>
   }
   tag 'img' do |tag|
-    # unless tag.attributes && tag.attributes.keys && tag.attributes.include?("src")
-    #   raise StandardTags::TagError.new("`img' tag must contain a `src' attribute.")
-    # end
+    unless tag.attributes && tag.attributes.keys && tag.attributes.include?("src")
+      raise StandardTags::TagError.new("`img' tag must contain a `src' attribute.")
+    end
     options = tag.attr.dup
     src = options['src'] ? "#{options.delete('src')}" : ''
     src.sub!(/^\/?/,'/')
     attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
     attributes = " #{attributes}" unless attributes.empty?
     begin
-      %{<img src="http://images.#{tag.render('host').sub(/^www\./,'')}#{src}"#{attributes} />}
+      %{<img src="http://#{tag.render('img_host')}#{src}"#{attributes} />}
     rescue StandardTags::TagError => e
-      e.message.sub!(/`host' tag/, "`img' tag")
+      e.message.sub!(/`img_host' tag/, "`img' tag")
       raise e
     end
   end

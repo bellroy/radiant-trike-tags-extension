@@ -33,14 +33,13 @@ class TrikeTagsTest < Test::Unit::TestCase
       "<r:link_with_current href=\"/\">Tester</r:link_with_current>")
   end
   def test_that_link_with_current_returns_a_class_current_link_when_linking_to_self
-    setup_page(make_page!("Kid1"))
-    debugger
+    setup_page(make_kid!(@page, "Kid1"))
 
     assert_parse_output("<a href=\"/kid1\" class=\"current\">Tester</a>",
       "<r:link_with_current href=\"/kid1\">Tester</r:link_with_current>")
   end
   def test_that_link_with_current_returns_a_class_current_link_when_linking_with_trailing_slash_to_self
-    setup_page(make_page!("Kid1"))
+    setup_page(make_kid!(@page, "Kid1"))
 
     assert_parse_output("<a href=\"/kid1/\" class=\"current\">Tester</a>",
       "<r:link_with_current href=\"/kid1/\">Tester</r:link_with_current>")
@@ -93,10 +92,13 @@ class TrikeTagsTest < Test::Unit::TestCase
 #          "`host' tag requires the root page to have a `host' page part that contains the hostname."))
 #      end
 #    end
-  def test_that_host_renders_from_response_if_that_is_defined
-    flunk
+  def test_that_host_renders_from_page_site_if_that_is_defined
+    @page.expects(:site).at_least(1).returns(stub(:base_domain => 'example.com'))
+
+    assert_parse_output("example.com", "<r:host />")
   end
   def test_that_host_renders_the_host_page_part_from_site_root_if_that_exists
+    @page.stubs(:site).returns(nil)
     part = stub(:content => "example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
@@ -105,6 +107,7 @@ class TrikeTagsTest < Test::Unit::TestCase
     assert_parse_output("example.com", "<r:host />")
   end
   def test_that_host_renders_a_helpful_error_if_root_host_part_not_found
+    @page.stubs(:site).returns(nil)
     root_page = stub()
     root_page.stubs(:part).with("host").returns(nil)
     Page.stubs(:root).returns(root_page)
@@ -115,6 +118,27 @@ class TrikeTagsTest < Test::Unit::TestCase
       assert e.message.match(/host.{1,3} tag/), "tag error doesn't mention 'host tag'"
       assert e.message.match(/root page/), "tag error doesn't mention 'root page'"
     end
+  end
+  def test_that_host_renders_from_response_if_that_is_defined
+    @page.stubs(:site).returns(nil)
+    request = stub(:host => "example.com")
+    page = stub_everything(:request => request)
+    globals = stub(:page => page)
+    @context.expects(:globals).at_least(1).returns(globals)
+
+    assert_parse_output("example.com", "<r:host />")
+  end
+
+  # img_host
+  def test_that_img_host_adds_images_to_host
+    @page.stubs(:site).returns(stub(:base_domain => 'example.com'))  # I'd prefer to stub this earlier, but don't know how
+
+    assert_parse_output("images.example.com", "<r:img_host />")
+  end
+  def test_that_img_host_strips_www_from_host
+    @page.stubs(:site).returns(stub(:base_domain => 'www.example.com'))  # I'd prefer to stub this earlier, but don't know how
+
+    assert_parse_output("images.example.com", "<r:img_host />")
   end
 
   # full_url
@@ -161,8 +185,8 @@ class TrikeTagsTest < Test::Unit::TestCase
     begin
       @parser.parse('<r:img src="/dir/img.jpg" attr="arbitrary" />')
     rescue StandardTags::TagError => e
-      assert e.message.match(/img.{1,3} tag/), "tag error doesn't mention 'img tag'"
-      assert e.message.match(/root page/), "tag error doesn't mention 'root page'"
+      assert e.message.match(/img.{1,3} tag/), "tag error doesn't mention 'img tag' - #{e.message}"
+      assert e.message.match(/root page/), "tag error doesn't mention 'root page' - #{e.message}"
     end
   end
 
