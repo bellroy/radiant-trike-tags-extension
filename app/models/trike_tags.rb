@@ -20,9 +20,11 @@ module TrikeTags
     end
   end
 
-  # <r:link_with_current href="href">...</link_with_current>
-  #
-  # Renders a simple link and adds class="current" if it's a link to the current page
+  desc %{
+    <r:link_with_current href="href">...</link_with_current>
+   
+    Renders a simple link and adds class="current" if it's a link to the current page
+  }
   tag "link_with_current" do |tag|
     raise TagError.new("`link_with_current' tag must contain a `href' attribute.") unless tag.attr.has_key?('href')
     current = ( tag.locals.page.url.match("^#{tag.attr['href']}/?$").nil? ) ?
@@ -32,25 +34,31 @@ module TrikeTags
       "<a href=\"#{href}\"#{current}>#{tag.expand}</a>"
   end
 
-  # <r:next [by="sort_order"]>...</r:next>
-  #
-  # Sets page context to next page sibling.
-  # Useful, say, for doing getting a link like this: <r:next by="title"><r:link/></r:next>
+  desc %{
+    <r:next [by="sort_order"]>...</r:next>
+   
+    Sets page context to next page sibling.
+    Useful, say, for doing getting a link like this: <r:next by="title"><r:link/></r:next>
+  }
   tag "next" do |tag|
     sibling_page(:next, tag)
   end
 
-  # <r:previous [by="sort_order"]>...</r:previous>
-  #
-  # Sets page context to previous page sibling.
-  # Useful, say, for doing getting a link like this: <r:previous by="title"><r:link/></r:previous>
+  desc %{
+    <r:previous [by="sort_order"]>...</r:previous>
+   
+    Sets page context to previous page sibling.
+    Useful, say, for doing getting a link like this: <r:previous by="title"><r:link/></r:previous>
+  }
   tag "previous" do |tag|
     sibling_page(:previous, tag)
   end
 
-  # <r:full_url />
-  #
-  # Full url, including the http://
+  desc %{
+    <r:full_url />
+   
+    Full url, including the http://
+  }
   tag "full_url" do |tag|
     host = tag.render("host")
     url  = tag.render("url")
@@ -59,6 +67,11 @@ module TrikeTags
 
   desc %{ 
     Renders the site host.
+    To do that it tries in order:
+    # site.base_domain from multi_site extension
+    # request.host
+    # root page "host" page part
+    # raises an error complaining about lack of a root page 'host' part
 
     *Usage:*
     <pre><code><r:host /></code></pre>
@@ -69,14 +82,10 @@ module TrikeTags
       tag.locals.page.site.base_domain
     elsif (request = tag.globals.page.request) && request.host
       request.host
+    elsif (host_part = Page.root.part('host'))
+      host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
     else
-      host_part = Page.root.part('host')
-      if host_part
-        host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
-      else  # attempt to get it from the request, which is flakey
-        (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
-        "`host' tag requires the root page to have a `host' page part that contains the hostname."))
-      end
+      raise(StandardTags::TagError.new("`host' tag requires the root page to have a `host' page part that contains the hostname."))
     end
   end
 
@@ -118,9 +127,11 @@ module TrikeTags
     end
   end
 
-  # <r:modification_date />
-  #
-  # Page#updated_at#to_formatted_s(:db)
+  desc %{
+    <r:modification_date />
+   
+    Page#updated_at#to_formatted_s(:db)
+  }
   tag "updated_at" do |tag|
     tag.locals.page.updated_at.xmlschema
   end
@@ -162,9 +173,8 @@ module TrikeTags
     unless current.attributes.keys.include?(by)
       raise StandardTags::TagError.new("`by' attribute of `#{flag}' tag must be set to a valid page attribute name.")
     end
-    # get the page's siblings, exclude any that have nil 
-    # for the sorting attribute, exclude virtual pages,
-    # and sort by the chosen attribute
+    # get the page's siblings, exclude any that have nil for the sorting
+    # attribute, exclude virtual pages, and sort by the chosen attribute
     siblings = current.self_and_siblings.delete_if { |s| s.send(by).nil? || s.virtual? }.sort_by { |page| page.attributes[by] }
     if index = siblings.index(current)
       new_page_index = index + page_index
@@ -175,9 +185,5 @@ module TrikeTags
         tag.expand
       end
     end
-  end
-
-  def env_table(tag)
-    (a = tag.locals.page.instance_values["behavior"]) && (b = a.instance_values['request']) && (c = b.instance_values['cgi']) && c.instance_values['env_table'] || {}
   end
 end
