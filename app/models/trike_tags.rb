@@ -33,7 +33,7 @@ module TrikeTags
                     href = tag.attr['href']
       "<a href=\"#{href}\"#{current}>#{tag.expand}</a>"
   end
-
+  
   desc %{
     <r:next [by="sort_order"]>...</r:next>
    
@@ -154,6 +154,42 @@ module TrikeTags
     tag.locals.page = section_root
     tag.expand if section_root
   end
+  
+  desc %{
+    Renders the containing elements only if the page's referer matches the regular expression
+    given in the @matches@ attribute. If the @ignore_case@ attribute is set to false, the
+    match is case sensitive. By default, @ignore_case@ is set to true.
+    
+    *Usage:*
+    <pre><code><r:if_referer matches="regexp" [ignore_case="true|false"]>...</if_url></code></pre>
+  }
+  tag 'if_referer' do |tag|
+    unless tag.attr.has_key?('matches')
+      raise TagError.new("`if_referer' tag must contain a `matches' attribute.")
+    end
+    regexp = build_regexp_for(tag, 'matches')
+    
+    unless tag.globals.page.request.env['HTTP_REFERER'].match(regexp).nil?
+       tag.expand
+    end
+  end
+  
+  desc %{
+    The opposite of the @if_referer@ tag.
+    
+    *Usage:*
+    <pre><code><r:unless_referer matches="regexp" [ignore_case="true|false"]>...</unless_referer></code></pre>
+  }  
+  tag 'unless_referer' do |tag|
+    unless tag.attr.has_key?('matches')
+      raise TagError.new("`unless_referer' tag must contain a `matches' attribute.")
+    end
+    regexp = build_regexp_for(tag, 'matches')
+    if tag.locals.page.request.env['HTTP_REFERER'].match(regexp).nil?
+        tag.expand
+    end
+  end
+
 
   private
 
