@@ -168,9 +168,8 @@ module TrikeTags
       raise TagError.new("`if_referer' tag must contain a `matches' attribute.")
     end
     regexp = build_regexp_for(tag, 'matches')
-    
-    unless tag.globals.page.request.env['HTTP_REFERER'].match(regexp).nil?
-       tag.expand
+    if (referer = tag.globals.page.request.env['HTTP_REFERER'] && referer.match(regexp))
+       tag.expand 
     end
   end
   
@@ -185,8 +184,9 @@ module TrikeTags
       raise TagError.new("`unless_referer' tag must contain a `matches' attribute.")
     end
     regexp = build_regexp_for(tag, 'matches')
-    if tag.locals.page.request.env['HTTP_REFERER'].match(regexp).nil?
-        tag.expand
+    referer = tag.globals.page.request.env['HTTP_REFERER']
+    unless referer && referer.match(regexp)
+       tag.expand
     end
   end
 
