@@ -160,6 +160,8 @@ module TrikeTags
     given in the @matches@ attribute. If the @ignore_case@ attribute is set to false, the
     match is case sensitive. By default, @ignore_case@ is set to true.
     
+    Doesnt work with page caching! So for pages that use this, caching has to be turned off.
+    
     *Usage:*
     <pre><code><r:if_referer matches="regexp" [ignore_case="true|false"]>...</if_url></code></pre>
   }
