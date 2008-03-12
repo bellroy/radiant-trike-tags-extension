@@ -14,6 +14,8 @@ module TrikeTags
       case uri = tag.locals.page.url[1..-1].split(/\//).first
       when nil
         "homepage"
+      when /^\d/
+        "n#{uri}"
       else
         uri
       end

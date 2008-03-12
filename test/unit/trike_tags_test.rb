@@ -22,6 +22,11 @@ class TrikeTagsTest < Test::Unit::TestCase
 
     assert_parse_output("kid1", "<r:site_area />")
   end
+  def test_that_site_area_appends_an_n_to_numeric_names
+    setup_page(make_kid!(@page, "404"))
+
+    assert_parse_output("n404", "<r:site_area />")
+  end
 
   # link_with_current
   def test_that_link_with_current_returns_a_normal_link_when_not_linking_to_self
@@ -115,8 +120,8 @@ class TrikeTagsTest < Test::Unit::TestCase
     begin
       @parser.parse('<r:host />')
     rescue StandardTags::TagError => e
-      assert e.message.match(/host.{1,3} tag/), "tag error doesn't mention 'host tag'"
-      assert e.message.match(/root page/), "tag error doesn't mention 'root page'"
+      assert e.message.match(/host.{1,3} tag/), "tag error doesn't mention 'host tag' - #{e.message}"
+      assert e.message.match(/root page/), "tag error doesn't mention 'root page' - #{e.message}"
     end
   end
   def test_that_host_renders_from_response_if_that_is_defined
