@@ -83,35 +83,30 @@ class TrikeTagsTest < Test::Unit::TestCase
   # end
 
   # host
-#    if tag.locals.page.respond_to?(:site)
-#      # multi_site extension is running
-#      tag.locals.page.site.base_domain
-#    elsif (request = tag.globals.page.request) && request.host
-#      request.host
-#    else
-#      host_part = Page.root.part('host')
-#      if host_part
-#        host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
-#      else  # attempt to get it from the request, which is flakey
-#        (a = env_table(tag)['REQUEST_URI']) && a.sub(/http:\/\//,'') || raise(StandardTags::TagError.new(
-#          "`host' tag requires the root page to have a `host' page part that contains the hostname."))
-#      end
-#    end
   def test_that_host_renders_from_page_site_if_that_is_defined
-    @page.expects(:site).at_least(1).returns(stub(:base_domain => 'example.com'))
+    @page.expects(:site).at_least(1).returns(stub(:base_domain => 'sub.example.com'))
 
-    assert_parse_output("example.com", "<r:host />")
+    assert_parse_output("sub.example.com", "<r:host />")
   end
   def test_that_host_renders_the_host_page_part_from_site_root_if_that_exists
     @page.stubs(:site).returns(nil)
-    part = stub(:content => "example.com")
+    part = stub(:content => "sub.example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
     Page.stubs(:root).returns(root_page)
 
-    assert_parse_output("example.com", "<r:host />")
+    assert_parse_output("sub.example.com", "<r:host />")
   end
-  def test_that_host_renders_a_helpful_error_if_root_host_part_not_found
+  def test_that_host_renders_from_response_if_that_is_defined
+    @page.stubs(:site).returns(nil)
+    request = stub(:host => "sub.example.com")
+    page = stub_everything(:request => request)
+    globals = stub(:page => page)
+    @context.expects(:globals).at_least(1).returns(globals)
+
+    assert_parse_output("sub.example.com", "<r:host />")
+  end
+  def test_that_host_renders_a_helpful_error_if_root_host_part_not_found_and_other_methods_fail
     @page.stubs(:site).returns(nil)
     root_page = stub()
     root_page.stubs(:part).with("host").returns(nil)
@@ -124,15 +119,6 @@ class TrikeTagsTest < Test::Unit::TestCase
       assert e.message.match(/root page/), "tag error doesn't mention 'root page' - #{e.message}"
     end
   end
-  def test_that_host_renders_from_response_if_that_is_defined
-    @page.stubs(:site).returns(nil)
-    request = stub(:host => "example.com")
-    page = stub_everything(:request => request)
-    globals = stub(:page => page)
-    @context.expects(:globals).at_least(1).returns(globals)
-
-    assert_parse_output("example.com", "<r:host />")
-  end
 
   # img_host
   def test_that_img_host_adds_images_to_host
@@ -144,6 +130,23 @@ class TrikeTagsTest < Test::Unit::TestCase
     @page.stubs(:site).returns(stub(:base_domain => 'www.example.com'))  # I'd prefer to stub this earlier, but don't know how
 
     assert_parse_output("images.example.com", "<r:img_host />")
+  end
+
+  # base_domain
+  def test_that_base_domain_strips_subdomains_from_host
+    domains = {
+      "a.b.com"      => "b.com",
+      "a.b.c.com"    => "c.com",
+      "a.b.c.com.au" => "c.com.au",
+      "a.b.aero"     => "b.aero",
+    }
+    test_stubs = domains.collect {|k,v| stub(:base_domain => k) }
+
+    @page.stubs(:site).returns(*(test_stubs.zip(test_stubs).flatten))  # I'd prefer to stub this earlier, but don't know how
+
+    domains.each do |k,v|
+      assert_parse_output(v, "<r:base_domain />", "#{k} => #{v}")
+    end
   end
 
   # full_url

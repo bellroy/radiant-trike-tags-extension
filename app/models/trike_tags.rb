@@ -69,8 +69,8 @@ module TrikeTags
 
   desc %{ 
     Renders the site host.
-    To do that it tries in order:
-    # site.base_domain from multi_site extension
+    To do that it tries (in order):
+    # page.site.base_domain from multi_site extension
     # request.host
     # root page "host" page part
     # raises an error complaining about lack of a root page 'host' part
@@ -100,6 +100,28 @@ module TrikeTags
   tag 'img_host' do |tag|
     begin
       %{images.#{tag.render('host').sub(/^www\./,'')}}
+    rescue StandardTags::TagError => e
+      e.message.sub!(/`host' tag/, "`img_host' tag")
+      raise e
+    end
+  end
+
+  desc %{
+    Renders the site's base domain (host, less any subdomains).
+      "a.b.com"      => "b.com",
+      "a.b.c.com"    => "c.com",
+      "a.b.c.com.au" => "c.com.au",
+      "a.b.aero"     => "b.aero",
+  }
+  tag 'base_domain' do |tag|
+    begin
+      host = tag.render('host')
+      case host
+      when /(?:[^\.]+\.)*?((?:[^\.]+\.){2}[^\.]{2})$/
+        $1
+      when /(?:[^\.]+\.)*?([^\.]+\.[^\.]+)$/
+        $1
+      end
     rescue StandardTags::TagError => e
       e.message.sub!(/`host' tag/, "`img_host' tag")
       raise e
