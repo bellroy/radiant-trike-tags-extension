@@ -136,9 +136,10 @@ class TrikeTagsTest < Test::Unit::TestCase
   def test_that_base_domain_strips_subdomains_from_host
     domains = {
       "a.b.com"      => "b.com",
-      "a.b.c.com"    => "c.com",
-      "a.b.c.com.au" => "c.com.au",
+      "a.b.c.com"    => "b.c.com",
+      "a.b.c.com.au" => "b.c.com.au",
       "a.b.aero"     => "b.aero",
+      "com"          => ".",
     }
     test_stubs = domains.collect {|k,v| stub(:base_domain => k) }
 

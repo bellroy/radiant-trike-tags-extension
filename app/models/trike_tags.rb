@@ -109,19 +109,15 @@ module TrikeTags
   desc %{
     Renders the site's base domain (host, less any subdomains).
       "a.b.com"      => "b.com",
-      "a.b.c.com"    => "c.com",
-      "a.b.c.com.au" => "c.com.au",
+      "a.b.c.com"    => "b.c.com",
+      "a.b.c.com.au" => "b.c.com.au",
       "a.b.aero"     => "b.aero",
   }
   tag 'base_domain' do |tag|
     begin
       host = tag.render('host')
-      case host
-      when /(?:[^\.]+\.)*?((?:[^\.]+\.){2}[^\.]{2})$/
-        $1
-      when /(?:[^\.]+\.)*?([^\.]+\.[^\.]+)$/
-        $1
-      end
+      host.match(/[^\.]+\.(.*)$/)
+      $1 || "."
     rescue StandardTags::TagError => e
       e.message.sub!(/`host' tag/, "`img_host' tag")
       raise e
