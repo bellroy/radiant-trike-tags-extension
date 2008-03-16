@@ -23,9 +23,10 @@ module TrikeTags
   end
 
   desc %{
-    <r:link_with_current href="href">...</link_with_current>
-   
     Renders a simple link and adds class="current" if it's a link to the current page
+
+    *Usage:*
+    <pre><code><r:link_with_current href="href">…</link_with_current></code></pre>
   }
   tag "link_with_current" do |tag|
     raise TagError.new("`link_with_current' tag must contain a `href' attribute.") unless tag.attr.has_key?('href')
@@ -37,29 +38,35 @@ module TrikeTags
   end
   
   desc %{
-    <r:next [by="sort_order"]>...</r:next>
-   
     Sets page context to next page sibling.
-    Useful, say, for doing getting a link like this: <r:next by="title"><r:link/></r:next>
+    Useful, say, for doing getting a link like this: 
+    
+    <pre><code><r:next by="title"><r:link/></r:next></code></pre>
+    
+    *Usage:*
+    <pre><code><r:next [by="sort_order"]>...</r:next></code></pre>
   }
   tag "next" do |tag|
     sibling_page(:next, tag)
   end
 
   desc %{
-    <r:previous [by="sort_order"]>...</r:previous>
-   
     Sets page context to previous page sibling.
-    Useful, say, for doing getting a link like this: <r:previous by="title"><r:link/></r:previous>
+    Useful, say, for doing getting a link like this: 
+    <pre><code><r:previous by="title"><r:link/></r:previous></code></pre>
+    
+    *Usage:*
+    <pre><code><r:previous [by="sort_order"]>...</r:previous></code></pre>
   }
   tag "previous" do |tag|
     sibling_page(:previous, tag)
   end
 
   desc %{
-    <r:full_url />
-   
-    Full url, including the http://
+    Renders full url, including the http://
+    
+    *Usage:*
+    <pre><code><r:full_url /></code></pre>
   }
   tag "full_url" do |tag|
     host = tag.render("host")
@@ -108,10 +115,15 @@ module TrikeTags
 
   desc %{
     Renders the site's base domain (host, less any subdomains).
+    
+    *Examples:*
       "a.b.com"      => "b.com",
       "a.b.c.com"    => "b.c.com",
       "a.b.c.com.au" => "b.c.com.au",
-      "a.b.aero"     => "b.aero",
+      "a.b.aero"     => "b.aero"
+    
+    *Usage:*
+    <pre><code><r:base_domain /></r:base_domain></code></pre>
   }
   tag 'base_domain' do |tag|
     begin
@@ -148,9 +160,10 @@ module TrikeTags
   end
 
   desc %{
-    <r:modification_date />
-   
-    Page#updated_at#to_formatted_s(:db)
+    Renders the date the page was last modified
+    
+    *Usage:*
+    <pre><code><r:modification_date /></code></pre>
   }
   tag "updated_at" do |tag|
     tag.locals.page.updated_at.xmlschema
