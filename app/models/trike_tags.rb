@@ -98,21 +98,6 @@ module TrikeTags
     end
   end
 
-  desc %{ 
-    images.{{host}} (removing any www.)
-
-    *Usage:*
-    <pre><code><r:img_host /></code></pre>
-  }
-  tag 'img_host' do |tag|
-    begin
-      %{images.#{tag.render('host').sub(/^www\./,'')}}
-    rescue StandardTags::TagError => e
-      e.message.sub!(/`host' tag/, "`img_host' tag")
-      raise e
-    end
-  end
-
   desc %{
     Renders the site's base domain (host, less any subdomains).
     
@@ -130,6 +115,21 @@ module TrikeTags
       host = tag.render('host')
       host.match(/[^\.]+\.(.*)$/)
       $1 || "."
+    rescue StandardTags::TagError => e
+      e.message.sub!(/`host' tag/, "`img_host' tag")
+      raise e
+    end
+  end
+  
+  desc %{ 
+    images.{{host}} (removing any www.)
+
+    *Usage:*
+    <pre><code><r:img_host /></code></pre>
+  }
+  tag 'img_host' do |tag|
+    begin
+      %{images.#{tag.render('host').sub(/^www\./,'')}}
     rescue StandardTags::TagError => e
       e.message.sub!(/`host' tag/, "`img_host' tag")
       raise e
@@ -158,6 +158,24 @@ module TrikeTags
       raise e
     end
   end
+  
+  desc %{
+    Renders a link to an asset relative to <code><r:img_host /></code>
+    
+    *Usage:*
+    <pre><code><r:asset_link href="asset_path"></code></pre>
+  }
+  tag "asset_link" do |tag|
+    options = tag.attr.dup
+    href = options['href'] ? "#{options.delete('href')}" : ''
+    begin
+      %Q{<a href="http://#{tag.render('img_host')}/#{href}">#{tag.expand}</a>}
+    rescue StandardTags::TagError => e
+      e.message.sub!(/`img_host' tag/, "`asset_link' tag")
+      raise e
+    end
+  end
+  
 
   desc %{
     Renders the date the page was last modified
