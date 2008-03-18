@@ -97,6 +97,10 @@ module TrikeTags
       raise(StandardTags::TagError.new("`host' tag requires the root page to have a `host' page part that contains the hostname."))
     end
   end
+  tag 'bare_host' do |tag|
+    tag.render('host').sub(/^www\./,'')
+  end
+
 
   desc %{
     Renders the site's base domain (host, less any subdomains).
@@ -112,7 +116,7 @@ module TrikeTags
   }
   tag 'base_domain' do |tag|
     begin
-      host = tag.render('host')
+      host = tag.render('bare_host')
       host.match(/[^\.]+\.(.*)$/)
       $1 || "."
     rescue StandardTags::TagError => e
@@ -122,14 +126,14 @@ module TrikeTags
   end
   
   desc %{ 
-    images.{{host}} (removing any www.)
+    images.{{bare_host}}
 
     *Usage:*
     <pre><code><r:img_host /></code></pre>
   }
   tag 'img_host' do |tag|
     begin
-      %{images.#{tag.render('host').sub(/^www\./,'')}}
+      %{images.#{tag.render('bare_host')}}
     rescue StandardTags::TagError => e
       e.message.sub!(/`host' tag/, "`img_host' tag")
       raise e
@@ -137,7 +141,7 @@ module TrikeTags
   end
 
   desc %{ 
-    Injects "http://images.{{host}}/{{src}}" into a normal img tag.
+    Injects "http://images.{{bare_host}}/{{src}}" into a normal img tag.
 
     *Usage:*
     <pre><code><r:img src="image_source" [other attributes...] /></code></pre>
