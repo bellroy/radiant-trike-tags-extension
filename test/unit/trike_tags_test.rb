@@ -27,6 +27,25 @@ class TrikeTagsTest < Test::Unit::TestCase
 
     assert_parse_output("n404", "<r:site_area />")
   end
+  # site_subarea
+  def test_that_site_subarea_returns_the_right_thing_on_the_root_page
+    assert_parse_output("", "<r:site_subarea />")
+  end
+  def test_that_site_subarea_returns_the_right_thing_on_level_one_child_pages
+    setup_page(make_kid!(@page, "Kid1"))
+
+    assert_parse_output("", "<r:site_subarea />")
+  end
+  def test_that_site_subarea_returns_the_right_thing_on_level_two_child_pages
+    setup_page(make_kid!(make_kid!(@page, "Kid1"), "Kid1.1"))
+
+    assert_parse_output("kid1.1", "<r:site_subarea />")
+  end
+  def test_that_site_subarea_returns_the_right_thing_on_level_three_child_pages
+    setup_page(make_kid!(make_kid!(make_kid!(@page, "Kid1"), "Kid1.1"), "Kid1.1.1"))
+
+    assert_parse_output("kid1.1", "<r:site_subarea />")
+  end
 
   # link_with_current
   def test_that_link_with_current_returns_a_normal_link_when_not_linking_to_self

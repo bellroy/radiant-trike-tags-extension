@@ -11,13 +11,33 @@ module TrikeTags
     unless tag.locals.page.part("site_area").nil?
       tag.locals.page.part("site_area").content
     else
-      case uri = tag.locals.page.url[1..-1].split(/\//).first
+      case slug = tag.locals.page.url[1..-1].split(/\//).first
       when nil
         "homepage"
       when /^\d/
+        "n#{slug}"
+      else
+        slug
+      end
+    end
+  end
+  desc %{
+    Returns the second level parent page slug (which functions nicely as a site sub-area name)
+
+    *Usage:*
+    <pre><code><r:site_subarea /></code></pre>
+  }
+  tag "site_subarea" do |tag|
+    unless tag.locals.page.part("site_subarea").nil?
+      tag.locals.page.part("site_subarea").content
+    else
+      case slug = tag.locals.page.url[1..-1].split(/\//)[1]
+      when nil
+        ""
+      when /^\d/
         "n#{uri}"
       else
-        uri
+        slug
       end
     end
   end
