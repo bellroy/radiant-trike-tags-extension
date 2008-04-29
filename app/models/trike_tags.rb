@@ -8,19 +8,9 @@ module TrikeTags
     <pre><code><r:site_area /></code></pre>
   }
   tag "site_area" do |tag|
-    unless tag.locals.page.part("site_area").nil?
-      tag.locals.page.part("site_area").content
-    else
-      case slug = tag.locals.page.url[1..-1].split(/\//).first
-      when nil
-        "homepage"
-      when /^\d/
-        "n#{slug}"
-      else
-        slug
-      end
-    end
+    site_area(tag)
   end
+
   desc %{
     Returns the second level parent page slug (which functions nicely as a site sub-area name)
 
@@ -28,18 +18,39 @@ module TrikeTags
     <pre><code><r:site_subarea /></code></pre>
   }
   tag "site_subarea" do |tag|
-    unless tag.locals.page.part("site_subarea").nil?
-      tag.locals.page.part("site_subarea").content
-    else
-      case slug = tag.locals.page.url[1..-1].split(/\//)[1]
-      when nil
-        ""
-      when /^\d/
-        "n#{uri}"
-      else
-        slug
-      end
-    end
+    site_subarea(tag)
+  end
+
+  desc %{
+    Returns "current" if the local page context is in the same site_area as the global page context.
+
+    *Usage:*
+    <pre><code><r:current_if_same_site_area /></code></pre>
+  }
+  tag "current_if_same_site_area" do |tag|
+    local_page = tag.locals.page
+    local_site_area = site_area(tag)
+    tag.locals.page = tag.globals.page
+    global_site_area = site_area(tag)
+    tag.locals.page = local_page
+
+    local_site_area == global_site_area ? "current" : ""
+  end
+
+  desc %{
+    Returns "current" if the local page context is in the same site_subarea as the global page context.
+
+    *Usage:*
+    <pre><code><r:current_if_same_site_area /></code></pre>
+  }
+  tag "current_if_same_site_subarea" do |tag|
+    local_page = tag.locals.page
+    local_site_subarea = tag.render("site_subarea")
+    tag.locals.page = tag.globals.page
+    global_site_subarea = tag.render("site_subarea")
+    tag.locals.page = local_page
+
+    local_site_subarea == global_site_subarea ? "current" : ""
   end
 
   desc %{
@@ -89,9 +100,8 @@ module TrikeTags
     <pre><code><r:full_url /></code></pre>
   }
   tag "full_url" do |tag|
-    host = tag.render("host")
-    url  = tag.render("url")
-    "http://#{host}#{url}"
+    url  = tag.locals.page.url
+    "http://#{host(tag)}#{url}"
   end
 
   desc %{ 
@@ -106,19 +116,10 @@ module TrikeTags
     <pre><code><r:host /></code></pre>
   }
   tag 'host' do |tag|
-    if tag.locals.page.respond_to?(:site) && tag.locals.page.site
-      # multi_site extension is running
-      tag.locals.page.site.base_domain
-    elsif (request = tag.globals.page.request) && request.host
-      request.host
-    elsif (host_part = Page.root.part('host'))
-      host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'') # strip trailing slash or leading protocol
-    else
-      raise(StandardTags::TagError.new("`host' tag requires the root page to have a `host' page part that contains the hostname."))
-    end
+    host(tag)
   end
   tag 'bare_host' do |tag|
-    tag.render('host').sub(/^www\./,'')
+    bare_host(tag)
   end
 
 
@@ -136,7 +137,7 @@ module TrikeTags
   }
   tag 'base_domain' do |tag|
     begin
-      host = tag.render('bare_host')
+      host = bare_host(tag)
       host.match(/[^\.]+\.(.*)$/)
       $1 || "."
     rescue StandardTags::TagError => e
@@ -152,16 +153,11 @@ module TrikeTags
     <pre><code><r:img_host /></code></pre>
   }
   tag 'img_host' do |tag|
-    begin
-      %{images.#{tag.render('bare_host')}}
-    rescue StandardTags::TagError => e
-      e.message.sub!(/`host' tag/, "`img_host' tag")
-      raise e
-    end
+    img_host(tag)
   end
 
   desc %{ 
-    Injects "http://images.{{bare_host}}/{{src}}" into a normal img tag.
+    Injects "http://{{img_host}}{{src}}" into a normal img tag.
 
     *Usage:*
     <pre><code><r:img src="image_source" [other attributes...] /></code></pre>
@@ -176,7 +172,7 @@ module TrikeTags
     attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
     attributes = " #{attributes}" unless attributes.empty?
     begin
-      %{<img src="http://#{tag.render('img_host')}#{src}"#{attributes} />}
+      %{<img src="http://#{img_host(tag)}#{src}"#{attributes} />}
     rescue StandardTags::TagError => e
       e.message.sub!(/`img_host' tag/, "`img' tag")
       raise e
@@ -193,7 +189,7 @@ module TrikeTags
     options = tag.attr.dup
     href = options['href'] ? "#{options.delete('href')}" : ''
     begin
-      %Q{<a href="http://#{tag.render('img_host')}/#{href}">#{tag.expand}</a>}
+      %Q{<a href="http://#{img_host(tag)}/#{href}">#{tag.expand}</a>}
     rescue StandardTags::TagError => e
       e.message.sub!(/`img_host' tag/, "`asset_link' tag")
       raise e
@@ -296,6 +292,72 @@ module TrikeTags
       if new_page
         tag.locals.page = new_page
         tag.expand
+      end
+    end
+  end
+
+  def host(tag)
+    host = nil
+    page = tag.locals.page
+    if (host_part = page.root.part('host'))
+      host = host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'').strip # strip trailing slash or leading protocol
+    elsif page.respond_to?(:site) && page.site
+      # multi_site extension is running
+      host = page.site.base_domain
+    elsif (request = tag.globals.page.request) && request.host
+      host = request.host
+      if host.nil? || host.empty? || host.match(/^\s*$/)
+        raise(StandardTags::TagError.new("request.host is returning something very unexpected (#{request.host.inspect}). You could override this behaviour by providing a 'host' page part on the site root page that contains the hostname."))
+      end
+    end
+    if host.nil? || host.empty? || host.match(/^\s*$/)
+      raise(StandardTags::TagError.new("`host' tag requires the root page to have a `host' page part that contains the hostname."))
+    else
+      host
+    end
+  end
+
+  def bare_host(tag)
+    host(tag).sub(/^www\./,'')
+  end
+
+  def img_host(tag)
+    begin
+      %{images.#{bare_host(tag)}}
+    rescue StandardTags::TagError => e
+      e.message.sub!(/`host' tag/, "`img_host' tag")
+      raise e
+    end
+  end
+
+  def site_area(tag)
+    page = tag.locals.page
+    unless page.part("site_area").nil?
+      page.part("site_area").content
+    else
+      case slug = page.url[1..-1].split(/\//).first
+      when nil
+        "homepage"
+      when /^\d/
+        "n#{slug}"
+      else
+        slug
+      end
+    end
+  end
+
+  def site_subarea(tag)
+    page = tag.locals.page
+    unless page.part("site_subarea").nil?
+      page.part("site_subarea").content
+    else
+      case slug = page.url[1..-1].split(/\//)[1]
+      when nil
+        ""
+      when /^\d/
+        "n#{uri}"
+      else
+        slug
       end
     end
   end

@@ -27,6 +27,24 @@ class TrikeTagsTest < Test::Unit::TestCase
 
     assert_parse_output("n404", "<r:site_area />")
   end
+  #   and current_if_same_site_area
+  def test_that_current_if_same_site_area_returns_current_if_in_the_same_site_area
+    a3 = make_kid!(a2 = make_kid!(a1 = make_kid!(@page, "a1"), "a2"), "a3")
+
+    setup_page(a1)
+    assert_parse_output("current", %[<r:find url="/a1"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("current", %[<r:find url="/a2"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("current", %[<r:find url="/a3"><r:current_if_same_site_area /></r:find>])
+  end
+  def test_that_current_if_same_site_area_returns_an_empty_string_if_not_in_the_same_site_area
+    a3 = make_kid!(a2 = make_kid!(a1 = make_kid!(@page, "a1"), "a2"), "a3")
+    b1 = make_kid!(@page, "b1")
+
+    setup_page(b1)
+    assert_parse_output("", %[<r:find url="/a1"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("", %[<r:find url="/a2"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("", %[<r:find url="/a3"><r:current_if_same_site_area /></r:find>])
+  end
   # site_subarea
   def test_that_site_subarea_returns_the_right_thing_on_the_root_page
     assert_parse_output("", "<r:site_subarea />")
@@ -46,27 +64,46 @@ class TrikeTagsTest < Test::Unit::TestCase
 
     assert_parse_output("kid1.1", "<r:site_subarea />")
   end
+  #   and current_if_same_site_subarea
+  def test_that_current_if_same_site_subarea_returns_current_if_in_the_same_site_subarea
+    a3 = make_kid!(a2 = make_kid!(a1 = make_kid!(@page, "a1"), "a2"), "a3")
+
+    setup_page(a2)
+    assert_parse_output("", %[<r:find url="/a1"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("current", %[<r:find url="/a2"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("current", %[<r:find url="/a3"><r:current_if_same_site_area /></r:find>])
+  end
+  def test_that_current_if_same_site_subarea_returns_an_empty_string_if_not_in_the_same_site_subarea
+    a3 = make_kid!(a2 = make_kid!(a1 = make_kid!(@page, "a1"), "a2"), "a3")
+    b1 = make_kid!(@page, "b1")
+
+    setup_page(b1)
+    assert_parse_output("", %[<r:find url="/a1"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("", %[<r:find url="/a2"><r:current_if_same_site_area /></r:find>])
+    assert_parse_output("", %[<r:find url="/a3"><r:current_if_same_site_area /></r:find>])
+  end
+
 
   # link_with_current
   def test_that_link_with_current_returns_a_normal_link_when_not_linking_to_self
-    assert_parse_output("<a href=\"/other_page\">Other Page</a>",
-      "<r:link_with_current href=\"/other_page\">Other Page</r:link_with_current>")
+    assert_parse_output(%[<a href="/other_page">Other Page</a>],
+      %[<r:link_with_current href="/other_page">Other Page</r:link_with_current>])
   end
   def test_that_link_with_current_returns_a_class_current_link_when_linking_to_self_at_root_page
-    assert_parse_output("<a href=\"/\" class=\"current\">Tester</a>",
-      "<r:link_with_current href=\"/\">Tester</r:link_with_current>")
+    assert_parse_output(%[<a href="/" class="current">Tester</a>],
+      %[<r:link_with_current href="/">Tester</r:link_with_current>])
   end
   def test_that_link_with_current_returns_a_class_current_link_when_linking_to_self
     setup_page(make_kid!(@page, "Kid1"))
 
-    assert_parse_output("<a href=\"/kid1\" class=\"current\">Tester</a>",
-      "<r:link_with_current href=\"/kid1\">Tester</r:link_with_current>")
+    assert_parse_output(%[<a href="/kid1" class="current">Tester</a>],
+      %[<r:link_with_current href="/kid1">Tester</r:link_with_current>])
   end
   def test_that_link_with_current_returns_a_class_current_link_when_linking_with_trailing_slash_to_self
     setup_page(make_kid!(@page, "Kid1"))
 
-    assert_parse_output("<a href=\"/kid1/\" class=\"current\">Tester</a>",
-      "<r:link_with_current href=\"/kid1/\">Tester</r:link_with_current>")
+    assert_parse_output(%[<a href="/kid1/" class="current">Tester</a>],
+      %[<r:link_with_current href="/kid1/">Tester</r:link_with_current>])
   end
 
   # next
@@ -102,21 +139,36 @@ class TrikeTagsTest < Test::Unit::TestCase
   # end
 
   # host
-  def test_that_host_renders_from_page_site_if_that_is_defined
-    @page.expects(:site).at_least(1).returns(stub(:base_domain => 'sub.example.com'))
-
-    assert_parse_output("sub.example.com", "<r:host />")
-  end
   def test_that_host_renders_the_host_page_part_from_site_root_if_that_exists
-    @page.stubs(:site).returns(nil)
     part = stub(:content => "sub.example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
-    Page.stubs(:root).returns(root_page)
+    @page.stubs(:root).returns(root_page)
 
     assert_parse_output("sub.example.com", "<r:host />")
   end
-  def test_that_host_renders_from_response_if_that_is_defined
+  def test_that_host_renders_the_host_page_part_from_site_root_if_that_exists_even_if_other_methods_also_exist
+    @page.stubs(:site).returns(stub(:base_domain => 'site.example.com'))
+    request = stub(:host => "request.example.com")
+    page = stub_everything(:request => request)
+    globals = stub(:page => page)
+    @context.stubs(:globals).returns(globals)
+    part = stub(:content => "roothostpart.example.com")
+    root_page = stub()
+    root_page.expects(:part).with("host").returns(part)
+    @page.stubs(:root).returns(root_page)
+
+    assert_parse_output("roothostpart.example.com", "<r:host />")
+  end
+  def test_that_host_renders_from_page_site_if_that_is_defined_and_root_page_host_part_is_not
+    root_page = stub()
+    root_page.stubs(:part).with("host").returns(nil)
+    @page.stubs(:root).returns(root_page)
+    @page.expects(:site).at_least_once.returns(stub(:base_domain => 'sub.example.com'))
+
+    assert_parse_output("sub.example.com", "<r:host />")
+  end
+  def test_that_host_renders_from_response_if_that_is_defined_and_site_is_not
     @page.stubs(:site).returns(nil)
     request = stub(:host => "sub.example.com")
     page = stub_everything(:request => request)
@@ -129,7 +181,7 @@ class TrikeTagsTest < Test::Unit::TestCase
     @page.stubs(:site).returns(nil)
     root_page = stub()
     root_page.stubs(:part).with("host").returns(nil)
-    Page.stubs(:root).returns(root_page)
+    @page.stubs(:root).returns(root_page)
 
     begin
       @parser.parse('<r:host />')
@@ -174,11 +226,13 @@ class TrikeTagsTest < Test::Unit::TestCase
     part = stub(:content => "example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
-    Page.stubs(:root).returns(root_page)
+    @page.stubs(:root).returns(root_page)
 
     assert_parse_output("http://example.com/", "<r:full_url />")
 
-    setup_page(make_kid!(@page, "Kid1"))
+    kid = make_kid!(@page, "Kid1")
+    kid.stubs(:root).returns(root_page)
+    setup_page(kid)
     assert_parse_output("http://example.com/kid1/", "<r:full_url />")
   end
 
@@ -187,7 +241,7 @@ class TrikeTagsTest < Test::Unit::TestCase
     part = stub(:content => "example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
-    Page.stubs(:root).returns(root_page)
+    @page.stubs(:root).returns(root_page)
 
     assert_parse_output(
       '<img src="http://images.example.com/dir/img.jpg" attr="arbitrary" />',
@@ -198,7 +252,7 @@ class TrikeTagsTest < Test::Unit::TestCase
     part = stub(:content => "www.example.com")
     root_page = stub()
     root_page.stubs(:part).with("host").returns(part)
-    Page.stubs(:root).returns(root_page)
+    @page.stubs(:root).returns(root_page)
 
     assert_parse_output(
       '<img src="http://images.example.com/dir/img.jpg" attr="arbitrary" />',
@@ -208,7 +262,7 @@ class TrikeTagsTest < Test::Unit::TestCase
   def test_that_img_renders_a_helpful_error_if_root_host_part_not_found
     root_page = stub()
     root_page.stubs(:part).with("host").returns(nil)
-    Page.stubs(:root).returns(root_page)
+    @page.stubs(:root).returns(root_page)
 
     begin
       @parser.parse('<r:img src="/dir/img.jpg" attr="arbitrary" />')
