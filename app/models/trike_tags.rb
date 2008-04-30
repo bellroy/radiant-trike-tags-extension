@@ -70,12 +70,22 @@ module TrikeTags
     <pre><code><r:link_with_current href="href">…</link_with_current></code></pre>
   }
   tag "link_with_current" do |tag|
-    raise TagError.new("`link_with_current' tag must contain a `href' attribute.") unless tag.attr.has_key?('href')
-    current = ( tag.locals.page.url.match("^#{tag.attr['href']}/?$").nil? ) ?
-      nil :
-                    ' class="current"'
-                    href = tag.attr['href']
-      "<a href=\"#{href}\"#{current}>#{tag.expand}</a>"
+    options = tag.attr.dup
+
+    anchor = options['anchor'] ? "##{options.delete('anchor')}" : ''
+    current = nil
+    if options['href']
+      href = options.delete('href')
+      current = tag.locals.page.url.match("^#{href}/?$")
+    else
+      href = tag.render('url')
+      current = tag.locals.page == tag.globals.page
+    end
+    options['class'] = "#{options['class']} current".strip if current
+    attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
+    attributes = " #{attributes}" unless attributes.empty?
+    text = tag.double? ? tag.expand : tag.render('title')
+    %{<a href="#{href}#{anchor}"#{attributes}>#{text}</a>}
   end
   
   desc %{

@@ -98,6 +98,7 @@ class TrikeTagsTest < Test::Unit::TestCase
 
 
   # link_with_current
+  # TODO: supports two behaviours - 1. tag.locals.page.url matches href attribute; 2. tag.locals.page == tag.globals.page. Only 1. is tested.
   def test_that_link_with_current_returns_a_normal_link_when_not_linking_to_self
     assert_parse_output(%[<a href="/other_page">Other Page</a>],
       %[<r:link_with_current href="/other_page">Other Page</r:link_with_current>])
