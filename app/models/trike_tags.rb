@@ -41,16 +41,26 @@ module TrikeTags
     Returns "current" if the local page context is in the same site_subarea as the global page context.
 
     *Usage:*
-    <pre><code><r:current_if_same_site_area /></code></pre>
+    <pre><code><r:current_if_same_site_subarea /></code></pre>
   }
   tag "current_if_same_site_subarea" do |tag|
     local_page = tag.locals.page
-    local_site_subarea = tag.render("site_subarea")
+    local_site_subarea = site_subarea(tag)
     tag.locals.page = tag.globals.page
-    global_site_subarea = tag.render("site_subarea")
+    global_site_subarea = site_subarea(tag)
     tag.locals.page = local_page
 
     local_site_subarea == global_site_subarea ? "current" : ""
+  end
+
+  desc %{
+    Returns "current" if the local page context is the same as the global page context.
+
+    *Usage:*
+    <pre><code><r:current_if_same_page /></code></pre>
+  }
+  tag "current_if_same_page" do |tag|
+    tag.locals.page == tag.globals.page ? "current" : ""
   end
 
   desc %{

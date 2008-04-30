@@ -83,6 +83,19 @@ class TrikeTagsTest < Test::Unit::TestCase
     assert_parse_output("", %[<r:find url="/a3"><r:current_if_same_site_area /></r:find>])
   end
 
+  # current_if_same_page
+  def test_that_current_if_same_page_returns_current_if_on_the_same_page
+    a1 = make_kid!(@page, "a1")
+
+    setup_page(a1)
+    assert_parse_output("current", %[<r:find url="/a1"><r:current_if_same_page /></r:find>])
+  end
+  def test_that_current_if_same_page_returns_an_empty_string_if_on_the_same_page
+    a1 = make_kid!(@page, "a1")
+
+    assert_parse_output("", %[<r:find url="/a1"><r:current_if_same_page /></r:find>])
+  end
+
 
   # link_with_current
   def test_that_link_with_current_returns_a_normal_link_when_not_linking_to_self
