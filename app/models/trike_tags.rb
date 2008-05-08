@@ -258,7 +258,7 @@ module TrikeTags
   }
   tag 'if_referer' do |tag|
     unless tag.attr.has_key?('matches')
-      raise TagError.new("`if_referer' tag must contain a `matches' attribute.")
+      raise StandardTags::TagError.new("`if_referer' tag must contain a `matches' attribute.")
     end
     regexp = build_regexp_for(tag, 'matches')
     if (referer = tag.globals.page.request.env['HTTP_REFERER'] && referer.match(regexp))
@@ -274,7 +274,7 @@ module TrikeTags
   }  
   tag 'unless_referer' do |tag|
     unless tag.attr.has_key?('matches')
-      raise TagError.new("`unless_referer' tag must contain a `matches' attribute.")
+      raise StandardTags::TagError.new("`unless_referer' tag must contain a `matches' attribute.")
     end
     regexp = build_regexp_for(tag, 'matches')
     referer = tag.globals.page.request.env['HTTP_REFERER']
