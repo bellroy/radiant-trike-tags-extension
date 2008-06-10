@@ -319,11 +319,12 @@ module TrikeTags
   def host(tag)
     host = nil
     page = tag.locals.page
-    if (host_part = page.root.part('host'))
+    root = page.root
+    if (host_part = root.part('host'))
       host = host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'').strip # strip trailing slash or leading protocol
-    elsif page.respond_to?(:site) && page.site
+    elsif root.respond_to?(:site) && root.site
       # multi_site extension is running
-      host = page.site.base_domain
+      host = root.site.base_domain
     elsif (request = tag.globals.page.request) && request.host
       host = request.host
       if host.nil? || host.empty? || host.match(/^\s*$/)

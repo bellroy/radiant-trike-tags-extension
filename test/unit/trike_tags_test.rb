@@ -178,7 +178,7 @@ class TrikeTagsTest < Test::Unit::TestCase
 		root_page = stub()
 		root_page.stubs(:part).with("host").returns(nil)
 		@page.stubs(:root).returns(root_page)
-		@page.expects(:site).at_least_once.returns(stub(:base_domain => 'sub.example.com'))
+		root_page.expects(:site).at_least_once.returns(stub(:base_domain => 'sub.example.com'))
 
 		assert_parse_output("sub.example.com", "<r:host />")
 	end
