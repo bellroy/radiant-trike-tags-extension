@@ -297,7 +297,8 @@ module TrikeTags
                    raise ArgumentError, "flag must be :next or :previous"
                  end
     current = tag.locals.page
-    by = (tag.attr['by'] || 'published_at').strip
+    order_by = Page.column_names.include?('position') ? 'position' : 'published_at'
+    by = (tag.attr['by'] || order_by).strip
 
     unless current.attributes.keys.include?(by)
       raise StandardTags::TagError.new("`by' attribute of `#{flag}' tag must be set to a valid page attribute name.")
