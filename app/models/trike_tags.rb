@@ -50,7 +50,7 @@ module TrikeTags
     global_site_subarea = site_subarea(tag)
     tag.locals.page = local_page
 
-    local_site_subarea == global_site_subarea ? "current" : ""
+    ((local_site_subarea == global_site_subarea) and (local_site_subarea != "" or global_site_subarea != "")) ? "current" : ""
   end
 
   desc %{
