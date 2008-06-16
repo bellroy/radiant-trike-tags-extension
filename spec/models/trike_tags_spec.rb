@@ -1,105 +1,118 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-describe "Trike Tags" do 
-    scenario :users_and_pages
+describe "TrikeTags module" do 
+  scenario :users_and_pages
 
-    before do
-       create_page "Parent2" do
-          create_page "Child2" do
-             create_page "Grandchild2" do
-                create_page "Great Grandchild2"
-             end
-          end
-       end
-    end
+  before do
+    # from pages scenario
+    # - Home
+    # -- First
+    # -- Parent
+    # --- Child
+    # ---- Grandchild
+    # ----- Great Grandchild
+  end
 
-    it "<r:site_area /> should return the top level parent page slug" do
-        page(:home).should render("<r:site_area />").as('homepage')  #doubt, shouldn't it be as '' ?
-        page(:parent).should render("<r:site_area />").as('parent')  
-        page(:child).should render("<r:site_area />").as('parent')
-        page(:grandchild).should render("<r:site_area />").as('parent')
-        page(:great_grandchild).should render("<r:site_area />").as('parent')
-    end
-
-    it "<r:site_subarea /> should return the second level parent page slug" do
-        page(:home).should render("<r:site_subarea />").as('')  
-        page(:parent).should render("<r:site_subarea />").as('')  
-        page(:child).should render("<r:site_subarea />").as('child')
-        page(:grandchild).should render("<r:site_subarea />").as('child')
-        page(:great_grandchild).should render("<r:site_subarea />").as('child')
-    end
-
-    it "<r:current_if_same_site_area /> should return 'current' if the local page context is in the same site_area as the global page context." do
-        page(:home).should render("<r:find url='/parent/child'><r:current_if_same_site_area /></r:find>").as('') 
-
-        page(:parent).should render("<r:find url='/parent'><r:current_if_same_site_area /></r:find>").as('current')
-        page(:parent).should render("<r:find url='/parent/child'><r:current_if_same_site_area /></r:find>").as('current')
-        page(:parent).should render("<r:find url='/parent/child/grandchild'><r:current_if_same_site_area /></r:find>").as('current')
-
-        page(:parent).should render("<r:find url='/parent2'><r:current_if_same_site_area /></r:find>").as('')
-        page(:parent).should render("<r:find url='/parent2/child2'><r:current_if_same_site_area /></r:find>").as('')
-        page(:parent).should render("<r:find url='/parent2/child2/grandchild2'><r:current_if_same_site_area /></r:find>").as('')
-
-        
-        page(:child).should render("<r:find url='/parent'><r:current_if_same_site_area /></r:find>").as('current')
-        page(:child).should render("<r:find url='/parent/child'><r:current_if_same_site_area /></r:find>").as('current')
-        page(:child).should render("<r:find url='/parent/child/grandchild'><r:current_if_same_site_area /></r:find>").as('current')
-
-        page(:child).should render("<r:find url='/parent2'><r:current_if_same_site_area /></r:find>").as('')
-        page(:child).should render("<r:find url='/parent2/child2'><r:current_if_same_site_area /></r:find>").as('')
-        page(:child).should render("<r:find url='/parent2/child2/grandchild2'><r:current_if_same_site_area /></r:find>").as('')
-
-
-        page(:grandchild).should render("<r:find url='/parent'><r:current_if_same_site_area /></r:find>").as('current')
-        page(:grandchild).should render("<r:find url='/parent/child'><r:current_if_same_site_area /></r:find>").as('current')
-        page(:grandchild).should render("<r:find url='/parent/child/grandchild'><r:current_if_same_site_area /></r:find>").as('current')
-
-        page(:grandchild).should render("<r:find url='/parent2'><r:current_if_same_site_area /></r:find>").as('')
-        page(:grandchild).should render("<r:find url='/parent2/child2'><r:current_if_same_site_area /></r:find>").as('')
-        page(:grandchild).should render("<r:find url='/parent2/child2/grandchild2'><r:current_if_same_site_area /></r:find>").as('')
-        
-    end
- 
-    it "<r:current_if_same_site_subarea /> returns 'current' if the local page context is in the same site_subarea as the global page context." do
-        page(:home).should render("<r:find url='/parent/child'><r:current_if_same_site_subarea /></r:find>").as('') 
-
-        page(:parent).should render("<r:find url='/parent'><r:current_if_same_site_subarea /></r:find>").as('current') #doubt, shouldn't it be as '' ?
-        page(:parent).should render("<r:find url='/parent/child'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:parent).should render("<r:find url='/parent/child/grandchild'><r:current_if_same_site_subarea /></r:find>").as('')
-
-    #   the below test fails
-    #   page(:parent).should render("<r:find url='/parent2'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:parent).should render("<r:find url='/parent2/child2'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:parent).should render("<r:find url='/parent2/child2/grandchild2'><r:current_if_same_site_subarea /></r:find>").as('')
-
-        
-        page(:child).should render("<r:find url='/parent'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:child).should render("<r:find url='/parent/child'><r:current_if_same_site_subarea /></r:find>").as('current')
-        page(:child).should render("<r:find url='/parent/child/grandchild'><r:current_if_same_site_subarea /></r:find>").as('current')
-
-        page(:child).should render("<r:find url='/parent2'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:child).should render("<r:find url='/parent2/child2'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:child).should render("<r:find url='/parent2/child2/grandchild2'><r:current_if_same_site_subarea /></r:find>").as('')
-
-
-        page(:grandchild).should render("<r:find url='/parent'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:grandchild).should render("<r:find url='/parent/child'><r:current_if_same_site_subarea /></r:find>").as('current')
-        page(:grandchild).should render("<r:find url='/parent/child/grandchild'><r:current_if_same_site_subarea /></r:find>").as('current')
-
-        page(:grandchild).should render("<r:find url='/parent2'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:grandchild).should render("<r:find url='/parent2/child2'><r:current_if_same_site_subarea /></r:find>").as('')
-        page(:grandchild).should render("<r:find url='/parent2/child2/grandchild2'><r:current_if_same_site_subarea /></r:find>").as('')
-
-    end    
-
-    private
-
-    def page(symbol = nil)
-      if symbol.nil?
-        @page ||= pages(:assorted)
-      else
-        @page = pages(symbol)
+  describe "<r:site_area />" do
+    fixture = [
+      #  From page          Expectation
+      [:home,             'homepage'],
+      [:parent,           'parent'],  
+      [:child,            'parent'],
+      [:grandchild,       'parent'],
+      [:great_grandchild, 'parent'],
+    ]
+    fixture.each do |page, expectation|
+      it "should return the top level parent page slug (from #{page})" do
+        page(page).should render("<r:site_area />").as(expectation)
       end
     end
+  end
+
+  describe "<r:site_subarea />" do
+    fixture = [
+      #  From page          Expectation
+      [:home,             ''],  
+      [:parent,           ''],  
+      [:child,            'child'],
+      [:grandchild,       'child'],
+      [:great_grandchild, 'child'],
+    ]
+    fixture.each do |page, expectation|
+      it "should return the second level parent page slug (from #{page})" do
+        page(page).should render("<r:site_subarea />").as(expectation)
+      end
+    end
+  end
+
+  describe "<r:current_if_same_site_area />" do
+    fixture = [
+      #  From page    Found page path             Expectation
+      [:parent,     "/",                        ''],
+      [:parent,     "/parent",                  'current'],
+      [:parent,     "/parent/child",            'current'],
+      [:parent,     "/parent/child/grandchild", 'current'],
+
+      [:child,      "/",                        ''],
+      [:child,      "/parent",                  'current'],
+      [:child,      "/parent/child",            'current'],
+      [:child,      "/parent/child/grandchild", 'current'],
+
+      [:grandchild, "/",                        ''],
+      [:grandchild, "/parent",                  'current'],
+      [:grandchild, "/parent/child",            'current'],
+      [:grandchild, "/parent/child/grandchild", 'current'],
+
+      [:home,       "/parent/child",            ''],
+
+      [:news,       "/parent",                  ''],
+      [:article_2,  "/parent/child/grandchild", ''],
+    ]
+    fixture.each do |page, path, expectation|
+      it "should return 'current' if the local page context is in the same site_area as the global page context (from #{page})" do
+        page(page).should render("<r:find url='#{path}'><r:current_if_same_site_area /></r:find>").as(expectation)
+      end
+    end
+  end
+
+  describe "<r:current_if_same_site_subarea />" do
+    fixture = [
+      #  From page    Found page path             Expectation
+      [:parent,     "/",                        ''],
+      [:parent,     "/parent",                  ''],
+      [:parent,     "/parent/child",            'current'],
+      [:parent,     "/parent/child/grandchild", 'current'],
+
+      [:child,      "/",                        ''],
+      [:child,      "/parent",                  ''],
+      [:child,      "/parent/child",            'current'],
+      [:child,      "/parent/child/grandchild", 'current'],
+
+      [:grandchild, "/",                        ''],
+      [:grandchild, "/parent",                  ''],
+      [:grandchild, "/parent/child",            'current'],
+      [:grandchild, "/parent/child/grandchild", 'current'],
+
+      [:home,       "/parent/child",            ''],
+
+      [:news,       "/parent",                  ''],
+      [:article_2,  "/parent/child/grandchild", ''],
+    ]
+    fixture.each do |page, path, expectation|
+      it "should return 'current' if the local page context is in the same site_subarea as the global page context (from #{page})" do
+        page(page).should render("<r:find url='#{path}'><r:current_if_same_site_subarea /></r:find>").as(expectation)
+      end
+    end
+  end    
+
+  private
+
+  def page(symbol = nil)
+    if symbol.nil?
+      @page ||= pages(:assorted)
+    else
+      @page = pages(symbol)
+    end
+  end
 
 end
