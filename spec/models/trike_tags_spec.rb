@@ -167,18 +167,77 @@ describe "TrikeTags module" do
    end 
   end  
 
+
+
   describe "<r:next>" do
+  
     fixture = [
-    #  From page     Order by                      Expectation
-      [:another,    "title",                       "Assorted"]
+    #  From page     Order by                   Expectation
+      [:another,    "title",                    "Assorted"],
+      [:article,    "title",                    "Article 2"],
+      [:article_4,  "title",                    ""], #confirm on "". no published page after article 4
+      [:radius,     "title",                    ""], #confirm on virtual page   
+      [:first,      "title",                    "Hidden"],#confirm whether we should get hidden page
+
+      [:home,       "published_at",             ""],
+      [:article_2,  "published_at",             "Article 3"],
+      [:article,    "published_at",             "Article 2"],
+      [:article_4,  "published_at",             "Draft Article"], #confirm as above. no published page after article 4
+      [:virtual,    "published_at",             ""] #which is correct "" or "Virtual"   
     ]
     fixture.each do |page, order_by, expectation|
       it "should set the page context to the next page sibling." do
         page(page).should render("<r:next by='#{order_by}'><r:title /></r:next>").as(expectation) 
       end
     end
-    #Without providing 'by' attribute
-    #page().should render("<r:next><r:title /></r:next>").as() 
+    
+    fixture = [
+    #  From page                   Expectation
+      [:home,                      ""],
+      [:another,                   "Assorted"],
+      [:article,                   "Article 2"], 
+      [:hidden,                    "News"]
+    ]
+    fixture.each do |page,  expectation|
+      it "should set the page context to the next page sibling." do
+        page(page).should render("<r:next><r:title /></r:next>").as(expectation) 
+      end
+    end
+  end 
+
+
+
+ describe "<r:previous>" do
+   
+    fixture = [
+    #  From page     Order by                   Expectation
+      [:home,       "title",                    ""],
+      [:another,    "title",                    ""],
+      [:article,    "title",                    ""],  
+      [:a,          "title",                    ""],
+
+      [:article_3,  "published_at",             "Article 2"],
+      [:article_2,  "published_at",             "Article"], 
+      [:article,    "published_at",             ""]
+    ]
+    fixture.each do |page, order_by, expectation|
+      it "should set the page context to the next page sibling." do
+        page(page).should render("<r:previous by='#{order_by}'><r:title /></r:previous>").as(expectation) 
+      end
+    end
+    
+    fixture = [
+    #  From page                   Expectation
+      [:first,                     "Draft"], #confirm weather it should be "Devtags" as Draft is not yet in published state
+      [:article,                   ""],      #confirm on "".
+      [:hidden,                    "First"],
+      [:virtual,                   ""]
+    ]
+    fixture.each do |page,  expectation|
+      it "should set the page context to the next page sibling." do
+        page(page).should render("<r:previous><r:title /></r:previous>").as(expectation) 
+      end
+    end
   end 
 
   private

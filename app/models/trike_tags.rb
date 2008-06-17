@@ -297,7 +297,7 @@ module TrikeTags
                    raise ArgumentError, "flag must be :next or :previous"
                  end
     current = tag.locals.page
-    order_by = Page.column_names.include?('position') ? 'position' : 'published_at'
+    order_by = Page.column_names.include?('position') ? 'position' : 'title'
     by = (tag.attr['by'] || order_by).strip
 
     unless current.attributes.keys.include?(by)
