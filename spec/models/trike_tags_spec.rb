@@ -328,7 +328,7 @@ describe "TrikeTags module" do
 
    describe "<r:section_root />" do
 
-        fixture = [
+      fixture = [
         # From page            Expectation 
         [:home,                ""],
         [:parent,              "Parent"],
@@ -340,7 +340,7 @@ describe "TrikeTags module" do
         it "should render host name (from #{page})" do
           page(page).should render("<r:section_root><r:title /></r:section_root>").as(expectation)
         end
-      end
+     end
    end     
   end     
 
