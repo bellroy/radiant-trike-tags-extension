@@ -304,8 +304,8 @@ module TrikeTags
       raise StandardTags::TagError.new("`by' attribute of `#{flag}' tag must be set to a valid page attribute name.")
     end
     # get the page's siblings, exclude any that have nil for the sorting
-    # attribute, exclude virtual pages, and sort by the chosen attribute
-    siblings = current.self_and_siblings.delete_if { |s| s.send(by).nil? || s.virtual? }.sort_by { |page| page.attributes[by] }
+    # attribute, exclude virtual pages and unpublished pages, and sort by the chosen attribute
+    siblings = current.self_and_siblings.delete_if { |s| s.send(by).nil? || s.virtual? || !s.published? }.sort_by { |page| page.attributes[by] }
     if index = siblings.index(current)
       new_page_index = index + page_index
       new_page = new_page_index >= 0 ? siblings[new_page_index] : nil
