@@ -31,7 +31,7 @@ describe "TrikeTags module" do
         [:parent,           'parent'],  
         [:child,            'parent'],
         [:grandchild,       'parent'],
-        [:great_grandchild, 'parent']
+        [:great_grandchild, 'parent'],
       ]
       fixture.each do |page, expectation|
         it "should return the top level parent page slug (from #{page})" do
@@ -47,7 +47,7 @@ describe "TrikeTags module" do
         [:parent,           ''],  
         [:child,            'child'],
         [:grandchild,       'child'],
-        [:great_grandchild, 'child']
+        [:great_grandchild, 'child'],
       ]
       fixture.each do |page, expectation|
         it "should return the second level parent page slug (from #{page})" do
@@ -77,7 +77,7 @@ describe "TrikeTags module" do
         [:home,       "/parent/child",            ''],
 
         [:first,      "/parent",                  ''],
-        [:first_child,"/parent/child/grandchild", '']
+        [:first_child,"/parent/child/grandchild", ''],
       ]
       fixture.each do |page, path, expectation|
         it "should return 'current' if the local page context is in the same site_area as the global page context (from #{page})" do
@@ -107,7 +107,7 @@ describe "TrikeTags module" do
         [:home,       "/parent/child",            ''],
 
         [:first,      "/parent",                  ''],
-        [:first_child,"/parent/child/grandchild", '']
+        [:first_child,"/parent/child/grandchild", ''],
       ]
       fixture.each do |page, path, expectation|
         it "should return 'current' if the local page context is in the same site_subarea as the global page context (from #{page})" do
@@ -138,7 +138,7 @@ describe "TrikeTags module" do
         [:home,       "/parent/child",            ''],
 
         [:first,      "/parent",                  ''],
-        [:first_child,"/parent/child/grandchild", '']
+        [:first_child,"/parent/child/grandchild", ''],
       ] 
       fixture.each do |page, path, expectation|
         it "should return 'current' if the local page context is in the same as the global page context (from #{page})" do
@@ -169,7 +169,7 @@ describe "TrikeTags module" do
         [:home,       "/first",                     "First",             '<a href="/first">First</a>'],    
 
         [:first,      "/parent",                    "Parent",           '<a href="/parent">Parent</a>'],
-        [:first_child,"/parent/child/grandchild",   "GrandChild",       '<a href="/parent/child/grandchild">GrandChild</a>']        
+        [:first_child,"/parent/child/grandchild",   "GrandChild",       '<a href="/parent/child/grandchild">GrandChild</a>'],        
       ]
       fixture.each do |page, path, link_text, expectation|
         it "should render a simple link and add class='current' if it's a link to the current page (from #{page})" do
@@ -225,7 +225,7 @@ describe "TrikeTags module" do
       #  From page                   Expectation
         [:first,                     "News"],
         [:news,                      "Third"], 
-        [:third,                     ""]
+        [:third,                     ""],
       ]
       fixture.each do |page,  expectation|
         it "should set the page context to the next page sibling ordered by title." do
@@ -262,15 +262,87 @@ describe "TrikeTags module" do
       #  From page                   Expectation
         [:first,                     ""],
         [:news,                      "First"], 
-        [:third,                     "News"]
+        [:third,                     "News"],
       ]
       fixture.each do |page,  expectation|
         it "should set the page context to the previous page sibling ordered by title." do
           page(page).should render("<r:previous><r:title /></r:previous>").as(expectation) 
         end
       end
-    end 
+   end   
   end
+
+  describe ": url tags :" do
+
+    before do
+      create_page "First", :updated_at => DateTime.parse('2008-05-10 7:30:45')
+      create_page "Parent" do
+        create_page "Child" do
+          create_page "Grandchild" do
+            create_page "Great Grandchild"
+          end
+        end
+      end
+    end
+
+    describe "<r:full_url />" do
+      
+      hostname_url = "http://testhost.tld"
+      fixture = [
+        # From page            Expectation 
+        [:home,                hostname_url + "/"],
+        [:parent,              hostname_url + "/parent/"],
+        [:child,               hostname_url + "/parent/child/"],
+        [:grandchild,          hostname_url + "/parent/child/grandchild/"],
+        [:great_grandchild,    hostname_url + "/parent/child/grandchild/great-grandchild/"],
+      ]
+      fixture.each do |page,  expectation|
+        it "should render full url, including the http:// (from #{page})" do
+          page(page).should render("<r:full_url />").as(expectation)
+        end
+      end
+    end
+
+   describe "<r:host />" do
+   hostname = "testhost.tld"
+      fixture = [
+        # From page            Expectation 
+        [:home,                hostname],
+        [:parent,              hostname],
+        [:child,               hostname],
+        [:grandchild,          hostname],
+        [:great_grandchild,    hostname],
+      ]
+      fixture.each do |page,  expectation|
+        it "should render host name (from #{page})" do
+          page(page).should render("<r:host />").as(expectation)
+        end
+      end      
+   end
+
+   describe "<r:updated_at />" do
+       it "should give the date the page was last modified (from fist)" do
+         page(:first).should render("<r:updated_at />").as('2008-05-10 7:30:45')
+       end
+   end
+
+   describe "<r:section_root />" do
+
+        fixture = [
+        # From page            Expectation 
+        [:home,                ""],
+        [:parent,              "Parent"],
+        [:child,               "Parent"],
+        [:grandchild,          "Parent"],
+        [:great_grandchild,    "Parent"],
+      ]
+      fixture.each do |page,  expectation|
+        it "should render host name (from #{page})" do
+          page(page).should render("<r:section_root><r:title /></r:section_root>").as(expectation)
+        end
+      end
+   end     
+  end     
 
   private
 
