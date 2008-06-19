@@ -242,8 +242,15 @@ module TrikeTags
                    else
                      nil
                    end
-    tag.locals.page = section_root
-    tag.expand if section_root
+
+    if section_root
+       found = Page.find_by_url(absolute_path_for(tag.locals.page.url, section_root.url))
+ 	if page_found?(found) 
+	  tag.locals.page = found
+	  tag.expand
+	end
+     end
+
   end
   
   desc %{
@@ -261,7 +268,7 @@ module TrikeTags
       raise StandardTags::TagError.new("`if_referer' tag must contain a `matches' attribute.")
     end
     regexp = build_regexp_for(tag, 'matches')
-    if (referer = tag.globals.page.request.env['HTTP_REFERER'] && referer.match(regexp))
+    if ((referer = tag.globals.page.request.env['HTTP_REFERER']) && referer.match(regexp))
        tag.expand 
     end
   end
