@@ -218,10 +218,10 @@ module TrikeTags
   
 
   desc %{
-    Renders the date the page was last modified
+    Renders the date the page was last modified in xmlschema format (ideal for xml feeds like sitemap.xml)
     
     *Usage:*
-    <pre><code><r:modification_date /></code></pre>
+    <pre><code><r:updated_at /></code></pre>
   }
   tag "updated_at" do |tag|
     tag.locals.page.updated_at.xmlschema

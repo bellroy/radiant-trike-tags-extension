@@ -321,8 +321,8 @@ describe "TrikeTags module" do
    end
 
    describe "<r:updated_at />" do
-       it "should give the date the page was last modified (from fist)" do
-         page(:first).should render("<r:updated_at />").as('2008-05-10 7:30:45')
+       it "should give the date the page was last modified (from first)" do
+         page(:first).should render("<r:updated_at />").as('2008-05-10T07:30:45Z')
        end
    end
 
