@@ -167,7 +167,7 @@ module TrikeTags
   end
   
   desc %{ 
-    images.{{bare_host}}
+    images.[bare_host]
 
     *Usage:*
     <pre><code><r:img_host /></code></pre>
