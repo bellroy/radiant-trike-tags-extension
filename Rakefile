@@ -99,7 +99,7 @@ namespace :spec do
   end
 end
 
-desc 'Generate documentation for the delete_me extension.'
+desc 'Generate documentation for the trike_tags extension.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title    = 'TrikeTagsExtension'
@@ -109,7 +109,7 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
 end
 
 # For extensions that are in transition
-desc 'Test the trike_tags extension.'
+desc 'Test the delete_me extension.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
   t.pattern = 'test/**/*_test.rb'
