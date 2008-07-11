@@ -120,7 +120,7 @@ module TrikeTags
     <pre><code><r:full_url /></code></pre>
   }
   tag "full_url" do |tag|
-    "http://#{host(tag)}#{tag.render(url)}"
+    "http://#{host(tag)}#{tag.render("url")}"
   end
 
   desc %{ 
