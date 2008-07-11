@@ -120,8 +120,7 @@ module TrikeTags
     <pre><code><r:full_url /></code></pre>
   }
   tag "full_url" do |tag|
-    url  = tag.locals.page.url
-    "http://#{host(tag)}#{url}"
+    "http://#{host(tag)}#{tag.render(url)}"
   end
 
   desc %{ 
@@ -254,7 +253,7 @@ module TrikeTags
     Doesnt work with page caching! So for pages that use this, caching has to be turned off.
     
     *Usage:*
-    <pre><code><r:if_referer matches="regexp" [ignore_case="true|false"]>...</if_url></code></pre>
+    <pre><code><r:if_referer matches="regexp" [ignore_case="true|false"]>...</if_referer></code></pre>
   }
   tag 'if_referer' do |tag|
     unless tag.attr.has_key?('matches')
