@@ -166,7 +166,7 @@ module TrikeTags
   end
   
   desc %{ 
-    images.{{bare_host}}
+    images.[bare_host]
 
     *Usage:*
     <pre><code><r:img_host /></code></pre>
@@ -217,10 +217,10 @@ module TrikeTags
   
 
   desc %{
-    Renders the date the page was last modified
+    Renders the date the page was last modified in xmlschema format (ideal for xml feeds like sitemap.xml)
     
     *Usage:*
-    <pre><code><r:modification_date /></code></pre>
+    <pre><code><r:updated_at /></code></pre>
   }
   tag "updated_at" do |tag|
     tag.locals.page.updated_at.xmlschema
@@ -241,8 +241,15 @@ module TrikeTags
                    else
                      nil
                    end
-    tag.locals.page = section_root
-    tag.expand if section_root
+
+    if section_root
+       found = Page.find_by_url(absolute_path_for(tag.locals.page.url, section_root.url))
+ 	if page_found?(found) 
+	  tag.locals.page = found
+	  tag.expand
+	end
+     end
+
   end
   
   desc %{
@@ -260,7 +267,7 @@ module TrikeTags
       raise StandardTags::TagError.new("`if_referer' tag must contain a `matches' attribute.")
     end
     regexp = build_regexp_for(tag, 'matches')
-    if (referer = tag.globals.page.request.env['HTTP_REFERER'] && referer.match(regexp))
+    if ((referer = tag.globals.page.request.env['HTTP_REFERER']) && referer.match(regexp))
        tag.expand 
     end
   end
