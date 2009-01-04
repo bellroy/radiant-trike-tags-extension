@@ -67,8 +67,8 @@ describe "TrikeTags module" do
         child.should render("<r:site_subarea />").as("Hello World") 
       end
     end
-
-    describe "<r:current_if_same_site_area />" do
+    
+    describe '<r:current_if_same_site_area />' do
       fixture = [
         #  From page    Found page path             Expectation
         [:parent,     "/",                        ''],
@@ -96,8 +96,69 @@ describe "TrikeTags module" do
           page(page).should render("<r:find url='#{path}'><r:current_if_same_site_area /></r:find>").as(expectation)
         end
       end
-    end
 
+    end
+    
+    describe "<r:if_same_site_area />" do
+      fixture = [
+        #  From page    Found page path             Expectation
+        [:parent,     "/",                        ''],
+        [:parent,     "/parent",                  'yes'],
+        [:parent,     "/parent/child",            'yes'],
+        [:parent,     "/parent/child/grandchild", 'yes'],
+
+        [:child,      "/",                        ''],
+        [:child,      "/parent",                  'yes'],
+        [:child,      "/parent/child",            'yes'],
+        [:child,      "/parent/child/grandchild", 'yes'],
+
+        [:grandchild, "/",                        ''],
+        [:grandchild, "/parent",                  'yes'],
+        [:grandchild, "/parent/child",            'yes'],
+        [:grandchild, "/parent/child/grandchild", 'yes'],
+
+        [:home,       "/parent/child",            ''],
+
+        [:first,      "/parent",                  ''],
+        [:first_child,"/parent/child/grandchild", ''],
+      ]
+      fixture.each do |page, path, expectation|
+        it "should render contained text if the local page context is in the same site_area as the global page context (from #{page})" do
+          page(page).should render("<r:find url='#{path}'><r:if_same_site_area>yes</r:if_same_site_area></r:find>").as(expectation)
+        end
+      end
+    end
+    
+    describe "<r:unless_same_site_area />" do
+      fixture = [
+        #  From page    Found page path             Expectation
+        [:parent,     "/",                        'no'],
+        [:parent,     "/parent",                  ''],
+        [:parent,     "/parent/child",            ''],
+        [:parent,     "/parent/child/grandchild", ''],
+
+        [:child,      "/",                        'no'],
+        [:child,      "/parent",                  ''],
+        [:child,      "/parent/child",            ''],
+        [:child,      "/parent/child/grandchild", ''],
+
+        [:grandchild, "/",                        'no'],
+        [:grandchild, "/parent",                  ''],
+        [:grandchild, "/parent/child",            ''],
+        [:grandchild, "/parent/child/grandchild", ''],
+
+        [:home,       "/parent/child",            'no'],
+
+        [:first,      "/parent",                  'no'],
+        [:first_child,"/parent/child/grandchild", 'no'],
+      ]
+      fixture.each do |page, path, expectation|
+        it "should render contained text unless the local page context is in the same site_area as the global page context (from #{page})" do
+          page(page).should render("<r:find url='#{path}'><r:unless_same_site_area>no</r:unless_same_site_area></r:find>").as(expectation)
+        end
+      end
+    end
+    
     describe "<r:current_if_same_site_subarea />" do
       fixture = [
         #  From page    Found page path             Expectation
@@ -126,8 +187,98 @@ describe "TrikeTags module" do
           page(page).should render("<r:find url='#{path}'><r:current_if_same_site_subarea /></r:find>").as(expectation)
         end
       end
-    end 
+    end
+    
+    describe "<r:current_if_same_site_subarea />" do
+      fixture = [
+        #  From page    Found page path             Expectation
+        [:parent,     "/",                        ''],
+        [:parent,     "/parent",                  ''],
+        [:parent,     "/parent/child",            ''],
+        [:parent,     "/parent/child/grandchild", ''],
 
+        [:child,      "/",                        ''],
+        [:child,      "/parent",                  ''],
+        [:child,      "/parent/child",            'current'],
+        [:child,      "/parent/child/grandchild", 'current'],
+
+        [:grandchild, "/",                        ''],
+        [:grandchild, "/parent",                  ''],
+        [:grandchild, "/parent/child",            'current'],
+        [:grandchild, "/parent/child/grandchild", 'current'],
+
+        [:home,       "/parent/child",            ''],
+
+        [:first,      "/parent",                  ''],
+        [:first_child,"/parent/child/grandchild", ''],
+      ]
+      fixture.each do |page, path, expectation|
+        it "should render 'current' if the local page context is in the same site_subarea as the global page context (from #{page})" do
+          page(page).should render("<r:find url='#{path}'><r:current_if_same_site_subarea /></r:find>").as(expectation)
+        end
+      end
+    end
+    
+    describe "<r:if_same_site_subarea />" do
+      fixture = [
+        #  From page    Found page path             Expectation
+        [:parent,     "/",                        ''],
+        [:parent,     "/parent",                  ''],
+        [:parent,     "/parent/child",            ''],
+        [:parent,     "/parent/child/grandchild", ''],
+
+        [:child,      "/",                        ''],
+        [:child,      "/parent",                  ''],
+        [:child,      "/parent/child",            'yes'],
+        [:child,      "/parent/child/grandchild", 'yes'],
+
+        [:grandchild, "/",                        ''],
+        [:grandchild, "/parent",                  ''],
+        [:grandchild, "/parent/child",            'yes'],
+        [:grandchild, "/parent/child/grandchild", 'yes'],
+
+        [:home,       "/parent/child",            ''],
+
+        [:first,      "/parent",                  ''],
+        [:first_child,"/parent/child/grandchild", ''],
+      ]
+      fixture.each do |page, path, expectation|
+        it "should render contained elements if the local page context is in the same site_subarea as the global page context (from #{page})" do
+          page(page).should render("<r:find url='#{path}'><r:if_same_site_subarea>yes</r:if_same_site_subarea></r:find>").as(expectation)
+        end
+      end
+    end
+    
+    describe "<r:unless_same_site_subarea />" do
+      fixture = [
+        #  From page    Found page path             Expectation
+        [:parent,     "/",                        'no'],
+        [:parent,     "/parent",                  'no'],
+        [:parent,     "/parent/child",            'no'],
+        [:parent,     "/parent/child/grandchild", 'no'],
+
+        [:child,      "/",                        'no'],
+        [:child,      "/parent",                  'no'],
+        [:child,      "/parent/child",            ''],
+        [:child,      "/parent/child/grandchild", ''],
+
+        [:grandchild, "/",                        'no'],
+        [:grandchild, "/parent",                  'no'],
+        [:grandchild, "/parent/child",            ''],
+        [:grandchild, "/parent/child/grandchild", ''],
+
+        [:home,       "/parent/child",            'no'],
+
+        [:first,      "/parent",                  'no'],
+        [:first_child,"/parent/child/grandchild", 'no'],
+      ]
+      fixture.each do |page, path, expectation|
+        it "should render contained elements unless the local page context is in the same site_subarea as the global page context (from #{page})" do
+          page(page).should render("<r:find url='#{path}'><r:unless_same_site_subarea>no</r:unless_same_site_subarea></r:find>").as(expectation)
+        end
+      end
+    end
+    
     describe "<r:current_if_same_page />" do
       fixture = [
         #  From page    Found page path             Expectation
@@ -157,8 +308,7 @@ describe "TrikeTags module" do
           page(page).should render("<r:find url='#{path}'><r:current_if_same_page /></r:find>").as(expectation)
         end
       end
-    end    
-
+    end
 
     describe "<r:link_with_current>" do
       fixture = [
@@ -193,7 +343,7 @@ describe "TrikeTags module" do
       it "should render a simple link to the current page and add class='current' if attribute 'href' is not provided" do
         page(:parent).should render("<r:link_with_current >Parent</r:link_with_current>").as('<a href="/parent/" class="current">Parent</a>')
       end    
-    end  
+    end
   end
 
   describe ": sibling tags :" do
