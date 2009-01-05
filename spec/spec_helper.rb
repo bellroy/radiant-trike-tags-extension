@@ -20,11 +20,17 @@ end
 
 include ApplicationHelper
 
+module RadiantSpecHelpers
+  def page(symbol = nil)
+    @page = pages(symbol)
+  end
+end
+
 Spec::Runner.configure do |config|
   config.use_transactional_fixtures = true
   # config.use_instantiated_fixtures  = false
   config.fixture_path = RAILS_ROOT + '/vendor/extensions/trike_tags/spec/fixtures/'
-
+  config.include RadiantSpecHelpers
   # You can declare fixtures for each behaviour like this:
   #   describe "...." do
   #     fixtures :table_a, :table_b

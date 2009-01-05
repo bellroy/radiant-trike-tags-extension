@@ -10,4 +10,10 @@ describe TrikeTagsExtension do
     TrikeTagsExtension.extension_name.should == 'Trike Tags'
   end
   
+  [SiteAreaTags, SiblingTags, UrlTags, ChangedStandardTags].each do |mod|
+    it "should include #{mod} module in Page class" do
+      Page.ancestors.should include(mod)
+    end
+  end
+  
 end
