@@ -81,62 +81,98 @@ describe ": sibling tags :" do
   end
 
   describe "<r:next> and <r:previous>", "without 'by' property supplied" do
-    before do
-      if Page.column_names.include?("position") then
-        create_page "First", :position => 2
-        create_page "News", :position => 1 do
-          create_page "Article"
+
+    unless Page.column_names.include?("position")
+      
+      describe 'without re-order extension installed' do
+        before(:each) do
+          create_page "c"
+          create_page "a"
+          create_page "b"
         end
-        create_page "Third", :position => 0
-      else
-        create_page "First"
-        create_page "News" do
-          create_page "Article"
+
+        describe "<r:previous>" do
+          fixtures = [
+              [:a, ""],
+              [:b, "a"],
+              [:c, "b"],
+          ]
+          fixtures.each do |page,  expectation_with_position, expectation_without_position|
+            it "should set the page context to the previous page sibling ordered by title." do
+              page(page).should render("<r:previous><r:title /></r:previous>").as(expectation_without_position) 
+            end
+          end
+        end 
+        
+        describe "<r:next>" do
+          fixtures = [
+              [:a, "b"],
+              [:b, "c"],
+              [:c, ""],
+          ]
+          fixtures.each do |page,  expectation|
+            it "should set the page context to the next sibling ordered by title." do
+              page(page).should render("<r:next><r:title /></r:next>").as(expectation) 
+            end
+          end
+
+          it 'should not return child page as sibling page' do
+            create_page 'page' do
+              create_page 'child'
+            end
+            create_page 'sibling'
+
+            page(:page).should render("<r:next><r:title /></r:next>").as('sibling') 
+          end
         end
-        create_page "Third"
       end
+      
+    else
+      
+      describe 'with re-order extension installed' do
+        before(:each) do
+          create_page "a_pos_2", :position => 2
+          create_page "b_pos_1", :position => 1
+          create_page "c_pos_0", :position => 0
+        end
+        
+        describe "<r:previous>" do
+          fixtures = [
+            [:c_pos_0,  ""],
+            [:b_pos_1,   "c_pos_0"],
+            [:a_pos_2,  "b_pos_1"],
+          ]
+          fixtures.each do |page,  expectation|
+            it "should set the page context to the previous sibling ordered by position." do
+              page(page).should render("<r:previous><r:title /></r:previous>").as(expectation)
+            end
+          end
+        end
+        
+        describe '<r:next>' do
+          [
+              [:c_pos_0,  "b_pos_1"],
+              [:b_pos_1,   "a_pos_2"],
+              [:a_pos_2,  ""],
+          ].each do |page_title,  expectation|
+            it "should set the page context to the next sibling ordered by position." do
+              page(page_title).should render("<r:next><r:title /></r:next>").as(expectation) 
+            end
+          end
+
+          it 'should not return child page as sibling page' do
+            create_page 'page' do
+              create_page 'child'
+            end
+            create_page 'sibling'
+
+            page(:page).should render("<r:next><r:title /></r:next>").as('sibling') 
+          end
+        end
+        
+      end
+      
     end
 
-    describe "<r:next>" do
-      fixture = [
-        #  From page       Expectation w/ position  Expectation w/o positon
-          [:first,         "",                      "News"],
-          [:news,          "First",                 "Third"], 
-          [:third,         "News",                  ""],
-      ]
-      fixture.each do |page,  expectation_with_position, expectation_without_position|
-        if Page.column_names.include?("position") then
-          # NOTE: we only test the condition that applies (install Reorder extension to test this case)
-          it "should set the page context to the next page sibling ordered by position." do
-            page(page).should render("<r:next><r:title /></r:next>").as(expectation_with_position) 
-          end
-        else
-          it "should set the page context to the next page sibling ordered by title." do
-            page(page).should render("<r:next><r:title /></r:next>").as(expectation_without_position) 
-          end
-        end
-      end
-    end 
-
-    describe "<r:previous>" do
-      fixture = [
-        #  From page       Expectation w/ position  Expectation w/o positon
-          [:first,         "News",                  ""],
-          [:news,          "Third",                 "First"], 
-          [:third,         "",                      "News"],
-      ]
-      fixture.each do |page,  expectation_with_position, expectation_without_position|
-        if Page.column_names.include?("position") then
-          # NOTE: we only test the condition that applies (install Reorder extension to test this case)
-          it "should set the page context to the previous page sibling ordered by position." do
-            page(page).should render("<r:previous><r:title /></r:previous>").as(expectation_with_position) 
-          end
-        else
-          it "should set the page context to the previous page sibling ordered by title." do
-            page(page).should render("<r:previous><r:title /></r:previous>").as(expectation_without_position) 
-          end
-        end
-      end
-    end   
   end
 end
