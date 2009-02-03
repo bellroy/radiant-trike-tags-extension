@@ -93,7 +93,7 @@ module SiteAreaTags
     Renders "current" if the local page context is in the same site area as the
     global page context (see <pre><code><r:site_area /></code></pre>)
     
-    Consider using the more flexible <pre><code><r:if_same_site_area /></code></pre>
+    Consider using the more flexible <code><r:if_same_site_area /></code>
 
     *Usage:*
     <pre><code><r:current_if_same_site_area /></code></pre>
@@ -106,7 +106,7 @@ module SiteAreaTags
     Renders the string "current" if the local page context is in the same
     site_subarea as the global page context.
     
-    Consider using the more flexible <pre><code><r:if_same_site_subarea /></code></pre>
+    Consider using the more flexible <code><r:if_same_site_subarea /></code>
     
     *Usage:*
     <pre><code><r:current_if_same_site_subarea /></code></pre>
@@ -119,7 +119,7 @@ module SiteAreaTags
     Renders the string "current" if the local page context is the same as the
     global page context.
     
-    Consider using the more flexible <pre><code><r:if_self /></code></pre>
+    Consider using the more flexible <code><r:if_self /></code>
 
     *Usage:*
     <pre><code><r:current_if_same_page /></code></pre>
