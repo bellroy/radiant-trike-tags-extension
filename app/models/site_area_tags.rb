@@ -154,19 +154,24 @@ module SiteAreaTags
   end
 
 private
+
   def site_area(tag)
     page = tag.locals.page
     unless page.part("site_area").nil?
       page.part("site_area").content
     else
-      case slug = page.url[1..-1].split(/\//).first
-      when nil
-        "homepage"
-      when /^\d/
-        "n#{slug}"
-      else
-        slug
+      site_area = case page.ancestors.length
+                  when 0
+                    "homepage"
+                  when 1
+                    page.slug
+                  else
+                    page.ancestors[-2].slug
+                  end
+      if site_area =~ /^\d/
+        site_area = "n#{site_area}"
       end
+      site_area
     end
   end
 
@@ -175,14 +180,18 @@ private
     unless page.part("site_subarea").nil?
       page.part("site_subarea").content
     else
-      case slug = page.url[1..-1].split(/\//)[1]
-      when nil
-        ""
-      when /^\d/
-        "n#{uri}"
-      else
-        slug
+      site_area = case page.ancestors.length
+                  when 0..1
+                    ""
+                  when 2
+                    page.slug
+                  else
+                    page.ancestors[-3].slug
+                  end
+      if site_area =~ /^\d/
+        site_area = "n#{site_area}"
       end
+      site_area
     end
   end
   

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-describe ": site_area tags :" do
+describe "site_area tags :" do
   scenario :users, :home_page
 
   before do
@@ -85,6 +85,7 @@ describe ": site_area tags :" do
     ]
     fixture.each do |page, path, expectation|
       it "should return 'current' if the local page context is in the same site_area as the global page context (from #{page})" do
+debugger
         page(page).should render("<r:find url='#{path}'><r:current_if_same_site_area /></r:find>").as(expectation)
       end
     end
