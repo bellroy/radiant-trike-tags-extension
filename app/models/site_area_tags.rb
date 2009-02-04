@@ -25,9 +25,9 @@ module SiteAreaTags
   
   desc %{
     Renders the contents of this tag if the local page context is in the same site
-    area as the global page context (see <r:site_area />)
+    area as the global page context (see <pre><code><r:site_area /></code></pre>)
     
-    This is typically used inside another tag (like <r:children:each>) to add
+    This is typically used inside another tag (like <pre><code><r:children:each></code></pre>) to add
     conditional mark-up if the child element is in the current site area.
 
     *Usage:*
@@ -46,9 +46,9 @@ module SiteAreaTags
   
   desc %{
     Renders the contents of this tag unless the local page context is in the same site
-    area as the global page context (see <r:if_same_site_area /> and <r:site_area />)
+    area as the global page context (see <pre><code><r:if_same_site_area /></code></pre> and <pre><code><r:site_area /></code></pre>)
     
-    This is typically used inside another tag (like <r:children:each>) to add
+    This is typically used inside another tag (like <pre><code><r:children:each></code></pre>) to add
     conditional mark-up if the child element is not in the current site area.
 
     *Usage:*
@@ -60,9 +60,9 @@ module SiteAreaTags
   
   desc %{
     Renders the contents of this tag if the local page context is in the same site
-    subarea as the global page context (see <r:site_subarea />)
+    subarea as the global page context (see <pre><code><r:site_subarea /></code></pre>)
     
-    This is typically used inside another tag (like <r:children:each>) to add
+    This is typically used inside another tag (like <pre><code><r:children:each></code></pre>) to add
     conditional mark-up if the child element is in the same site sub-area as 
     the actual page.
 
@@ -75,7 +75,7 @@ module SiteAreaTags
   
   desc %{
     Renders the contents of this tag unless the local page context is in the same site
-    subarea as the global page context (see <r:site_subarea />)
+    subarea as the global page context (see <pre><code><r:site_subarea /></code></pre>)
     
     This is typically used inside another tag (like <r:children:each>) to add
     conditional mark-up if the child element is is note in the same site sub-area
@@ -91,9 +91,9 @@ module SiteAreaTags
   
   desc %{
     Renders "current" if the local page context is in the same site area as the
-    global page context (see <r:site_area />)
+    global page context (see <pre><code><r:site_area /></code></pre>)
     
-    Consider using the more flexible <r:if_same_site_area />
+    Consider using the more flexible <pre><code><r:if_same_site_area /></code></pre>
 
     *Usage:*
     <pre><code><r:current_if_same_site_area /></code></pre>
@@ -106,7 +106,7 @@ module SiteAreaTags
     Renders the string "current" if the local page context is in the same
     site_subarea as the global page context.
     
-    Consider using the more flexible <r:if_same_site_subarea />
+    Consider using the more flexible <pre><code><r:if_same_site_subarea /></code></pre>
     
     *Usage:*
     <pre><code><r:current_if_same_site_subarea /></code></pre>
@@ -119,7 +119,7 @@ module SiteAreaTags
     Renders the string "current" if the local page context is the same as the
     global page context.
     
-    Consider using the more flexible <r:if_self />
+    Consider using the more flexible <pre><code><r:if_self /></code></pre>
 
     *Usage:*
     <pre><code><r:current_if_same_page /></code></pre>
