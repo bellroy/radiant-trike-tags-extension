@@ -5,7 +5,7 @@ class TrikeTagsExtension < Radiant::Extension
   version "2.1"
   description "A handfull of Radiant tags that we've found generally useful."
   
-  url "https://svn.trike.com.au/source/radiant/extensions/trike_tags"
+  url "http://github.com/tricycle/radiant-trike-tags-extension"
   
   def activate
     Page.class_eval do
