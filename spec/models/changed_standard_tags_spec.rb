@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe ": changed standard tags :" do
-  scenario :users, :home_page
+  dataset :users, :home_page
 
   describe "<r:url />" do
     before do

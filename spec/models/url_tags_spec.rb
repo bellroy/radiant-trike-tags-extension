@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe ": url tags :" do
-  scenario :users, :home_page
+  dataset :users, :home_page
 
   before do
     create_page "First", :updated_at => DateTime.parse('2008-05-10 7:30:45')

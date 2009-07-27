@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe ": sibling tags :" do
-  scenario :users, :home_page
+  dataset :users, :home_page
 
   describe "<r:next> and <r:previous>", "with 'by' property supplied" do
     class VirtualPage < Page
