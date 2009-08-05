@@ -132,7 +132,9 @@ describe ": sibling tags :" do
       describe 'with re-order extension installed' do
         before(:each) do
           create_page "a_pos_2", :position => 2
-          create_page "b_pos_1", :position => 1
+          create_page "b_pos_1", :position => 1 do
+            create_page "b_child_pos_0", :position => 0
+          end
           create_page "c_pos_0", :position => 0
         end
         
@@ -152,7 +154,7 @@ describe ": sibling tags :" do
         describe '<r:next>' do
           [
               [:c_pos_0,  "b_pos_1"],
-              [:b_pos_1,   "a_pos_2"],
+              [:b_pos_1,  "a_pos_2"],
               [:a_pos_2,  ""],
           ].each do |page_title,  expectation|
             it "should set the page context to the next sibling ordered by position." do
@@ -161,12 +163,7 @@ describe ": sibling tags :" do
           end
 
           it 'should not return child page as sibling page' do
-            create_page 'page' do
-              create_page 'child'
-            end
-            create_page 'sibling'
-
-            page(:page).should render("<r:next><r:title /></r:next>").as('sibling') 
+            page(:b_pos_1).should render("<r:next><r:title /></r:next>").as('a_pos_2') 
           end
         end
         
