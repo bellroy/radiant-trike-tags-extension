@@ -1,14 +1,30 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
+# from http://codesnippets.joyent.com/posts/show/1438
+module Kernel
+  # Suppresses warnings within a given block.
+  def with_warnings_suppressed
+    saved_verbosity = $-v
+    $-v = nil
+    yield
+  ensure
+    $-v = saved_verbosity
+  end
+end
+
 describe "environment tags" do
   dataset :home_page
 
   #HACK: Would be better off with helper
   before(:each) do
-    RAILS_ENV = 'fake_env'
+    with_warnings_suppressed do
+      RAILS_ENV = 'fake_env'
+    end
   end
   after(:each) do
-    RAILS_ENV = 'test'
+    with_warnings_suppressed do
+      RAILS_ENV = 'test'
+    end
   end
 
   describe "<r:if_env />" do
