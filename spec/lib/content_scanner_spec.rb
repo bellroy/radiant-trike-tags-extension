@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe ContentScanner do
-  it "should be included" do
+  it "should be loaded" do
     lambda { ContentScanner }.should_not raise_error
   end
   it "should alias #find to #find_replace" do
@@ -26,7 +26,7 @@ describe ContentScanner do
 
     describe "without replace" do
       it "should find exact text matches in PageParts and return matching pages" do
-        match = mock("part with match", :null_object => true, :content => "containing a thing |here|.")
+        match = mock("part with match", :null_object => true, :content => "containing a thing |here|.", :id => 42)
         nonmatch = mock("part without match", :null_object => true, :content => "not containing the thing.")
         PagePart.stub!(:find).and_return([match, nonmatch])
 
@@ -36,10 +36,10 @@ describe ContentScanner do
     end
     describe "with replace" do
       it "should replace exact text matches in PageParts and return matching pages" do
-        match = mock("part with match", :null_object => true, :content => "containing a thing |here|.")
+        match = mock("part with match", :null_object => true, :content => "containing a thing |here|.", :id => 42)
         nonmatch = mock("part without match", :null_object => true, :content => "not containing the thing.")
         PagePart.stub!(:find).and_return([match, nonmatch])
-        match.content.should_receive(:gsub!).with("here", "there").and_return("containing a thing |there|.")
+        match.should_receive(:update_attribute).with(:content, "containing a thing |there|.")
 
         ContentScanner.find_replace("here", "there").should == [match]
       end
