@@ -12,6 +12,7 @@ class TrikeTagsExtension < Radiant::Extension
       include SiteAreaTags
       include SiblingTags
       include UrlTags
+      include EmbedRemoteTags
       include EnvironmentTags
       include ChangedStandardTags
     end
