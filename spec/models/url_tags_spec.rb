@@ -79,6 +79,11 @@ describe ": url tags :" do
       @stub_page.should render("<r:host />").as('www.example.com')
     end
 
+    it "should render the Radiant::Config['canonical_site'] if it exists" do
+      Radiant::Config.stub!(:[]).with('canonical_site').and_return("oursite.com")
+      @stub_page.should render("<r:host />").as("oursite.com")
+    end
+
   end
 
   describe "<r:bare_host />" do

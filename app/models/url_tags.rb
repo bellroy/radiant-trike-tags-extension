@@ -184,20 +184,22 @@ private
     page = tag.locals.page
     root = page.root
     if (host_part = root.part('host'))
-      host = host_part.content.sub(%r{/?$},'').sub(%r{^https?://},'').strip # strip trailing slash or leading protocol
+      host = host_part.content
     elsif root.respond_to?(:site) && root.site
       # multi_site extension is running
       host = root.site.base_domain
+    elsif !Radiant::Config['canonical_site'].blank?
+      host = Radiant::Config['canonical_site']
     elsif (request = tag.globals.page.request) && request.host
       host = request.host
       if host.nil? || host.empty? || host.match(/^\s*$/)
         raise(StandardTags::TagError.new("request.host is returning something very unexpected (#{request.host.inspect}). You could override this behaviour by providing a 'host' page part on the site root page that contains the hostname."))
       end
     end
-    if host.nil? || host.empty? || host.match(/^\s*$/)
+    if host.blank?
       raise(StandardTags::TagError.new("`host' tag requires the root page to have a `host' page part that contains the hostname."))
     else
-      host
+      host.sub(%r{/?$},'').sub(%r{^https?://},'').strip # strip trailing slash or leading protocol
     end
   end
 
