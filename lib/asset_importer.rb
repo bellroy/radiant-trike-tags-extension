@@ -4,7 +4,7 @@ module AssetImporter
   # tries to import all files found under +path+ as Paperclipped Asset
   # returns the saved asset records
   def self.import(path)
-    import_folder(Pathname.new(path)).flatten
+    import_folder(Pathname.new(path))
   end
 
   def self.import_folder(pathname)
