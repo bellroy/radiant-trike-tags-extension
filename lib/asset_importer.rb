@@ -26,9 +26,7 @@ module AssetImporter
       end
     end
     puts "Rewriting URLs in content"
-    require 'pp'
-    pp asset_mapping
-    # rewrite_urls(asset_mapping)
+    rewrite_urls(asset_mapping)
   end
   
   def self.rewrite_urls(asset_mapping)
@@ -45,8 +43,10 @@ module AssetImporter
   def self.fix(resource)
     resource.content.gsub!(%r{/?(?:\.\./)*(assets/[^'"\n)]+[^'")\s])}) do |asset_path|
       dir, file = File.split($1)
-      asset = @asset_mapping[File.join(dir, URI.decode(file))]
+      old_asset = File.join(dir, URI.decode(file))
+      asset = @asset_mapping[old_asset]
       if asset
+        puts "#{old_asset} => #{asset.url}"
         asset.url
       else
         asset_path
