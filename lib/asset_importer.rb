@@ -8,8 +8,8 @@ class AssetImporter
   # tries to import all files found under +path+ as Paperclipped Asset
   # assumes that +path+ is under public/assets
   def import(path)
-    @asset_mapping = {}
     import_folder(Pathname.new(path))
+    rewrite_urls
   end
 
   attr_accessor :asset_mapping
@@ -47,11 +47,10 @@ class AssetImporter
         end
       end
     end
-    puts "Rewriting URLs in content"
-    rewrite_urls
   end
   
   def rewrite_urls
+    puts "Rewriting URLs in content"
     [PagePart, Snippet, Layout].each do |klass|
       klass.find_each do |resource|
         fix resource
