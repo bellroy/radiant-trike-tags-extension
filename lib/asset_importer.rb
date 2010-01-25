@@ -69,8 +69,8 @@ protected
       old_asset = File.join(dir, URI.decode(file))
       asset = @asset_mapping[old_asset]
       if asset
-        puts "#{old_asset} => #{asset.url}"
-        asset.url
+        puts "#{old_asset} => #{asset.asset.url}"
+        asset.asset.url
       else
         asset_path
       end

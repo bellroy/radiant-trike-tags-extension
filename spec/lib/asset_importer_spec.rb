@@ -58,7 +58,7 @@ describe AssetImporter do
     before do
       @part = PagePart.new(:content => '')
       @part.stub!(:save!)
-      @asset = mock_model(Asset, :caption => nil, :title => 'MyAsset', :update_attributes => nil)
+      @asset = mock_model(Asset, :caption => nil, :title => 'MyAsset', :update_attributes => nil, :asset => mock('Attachment'))
       PagePart.stub!(:find_each).and_yield(@part)
     end
 
@@ -80,7 +80,7 @@ describe AssetImporter do
         @part.content = "background-image: url(#{path});"
         asset_mapping = {realpath.sub(/^\//, '') => @asset}
         new_path = "/new#{realpath}"
-        @asset.stub!(:url).and_return(new_path)
+        @asset.asset.stub!(:url).and_return(new_path)
         @importer.asset_mapping = asset_mapping
         @importer.rewrite_urls
         @part.content.should == "background-image: url(#{new_path});"
@@ -90,7 +90,7 @@ describe AssetImporter do
         @part.content = %Q{<param name="movie" value="#{path}" />}
         asset_mapping = {realpath.sub(/^\//, '') => @asset}
         new_path = "/new#{realpath}"
-        @asset.stub!(:url).and_return(new_path)
+        @asset.asset.stub!(:url).and_return(new_path)
         @importer.asset_mapping = asset_mapping
         @importer.rewrite_urls
         @part.content.should == %Q{<param name="movie" value="#{new_path}" />}
@@ -100,7 +100,7 @@ describe AssetImporter do
         @part.content = %Q{<img alt="The Beach House Inn - New England Maine" src="#{path}" />}
         asset_mapping = {realpath.sub(/^\//, '') => @asset}
         new_path = "/new#{realpath}"
-        @asset.stub!(:url).and_return(new_path)
+        @asset.asset.stub!(:url).and_return(new_path)
         @importer.asset_mapping = asset_mapping
         @importer.rewrite_urls
         @part.content.should == %Q{<img alt="The Beach House Inn - New England Maine" src="#{new_path}" />}
@@ -110,7 +110,7 @@ describe AssetImporter do
         @part.content = %Q{<r:mailer:image src="#{path}" class="submit" />}
         asset_mapping = {realpath.sub(/^\//, '') => @asset}
         new_path = "/new#{realpath}"
-        @asset.stub!(:url).and_return(new_path)
+        @asset.asset.stub!(:url).and_return(new_path)
         @importer.asset_mapping = asset_mapping
         @importer.rewrite_urls
         @part.content.should == %Q{<r:mailer:image src="#{new_path}" class="submit" />}
@@ -120,7 +120,7 @@ describe AssetImporter do
         @part.content = %Q{IEPNGFix.blankImg = '#{path}';}
         asset_mapping = {realpath.sub(/^\//, '') => @asset}
         new_path = "/new#{realpath}"
-        @asset.stub!(:url).and_return(new_path)
+        @asset.asset.stub!(:url).and_return(new_path)
         @importer.asset_mapping = asset_mapping
         @importer.rewrite_urls
         @part.content.should == %Q{IEPNGFix.blankImg = '#{new_path}';}
@@ -130,7 +130,7 @@ describe AssetImporter do
         @part.content = path + ' '
         asset_mapping = {realpath.sub(/^\//, '') => @asset}
         new_path = "/new#{realpath}"
-        @asset.stub!(:url).and_return(new_path)
+        @asset.asset.stub!(:url).and_return(new_path)
         @importer.asset_mapping = asset_mapping
         @importer.rewrite_urls
         @part.content.should == new_path + ' '
@@ -161,8 +161,8 @@ describe AssetImporter do
     it "should handle assets with the same name in different directories" do
       @part.content = "/assets/venues/beach-house-inn.jpg\n/assets/backgrounds/beach-house-inn.jpg"
       asset_mapping = {
-        'assets/backgrounds/beach-house-inn.jpg' => mock_model(Asset, :url => 'asset1'),
-        'assets/venues/beach-house-inn.jpg' => mock_model(Asset, :url => 'asset2')
+        'assets/backgrounds/beach-house-inn.jpg' => mock_model(Asset, :asset => mock('Attachment', :url => 'asset1')),
+        'assets/venues/beach-house-inn.jpg' => mock_model(Asset, :asset => mock('Attachment', :url => 'asset2'))
       }
       @importer.asset_mapping = asset_mapping
       @importer.rewrite_urls
