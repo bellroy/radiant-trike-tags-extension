@@ -26,7 +26,7 @@ module AssetImporter
     end
 
     pathname.children.collect do |image|
-      filename = image.relative_path_from(assets_dir)
+      filename = image.relative_path_from(assets_dir.parent)
       next if filename.to_s =~ /^\./
       if image.directory?
         puts "Importing directory '#{image}'"
