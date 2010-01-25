@@ -1,13 +1,20 @@
 require 'pathname'
 
-module AssetImporter
+class AssetImporter
+  def initialize
+    @asset_mapping = {}
+  end
+
   # tries to import all files found under +path+ as Paperclipped Asset
   # assumes that +path+ is under public/assets
-  def self.import(path)
+  def import(path)
+    @asset_mapping = {}
     import_folder(Pathname.new(path))
   end
 
-  def self.assets_dir_for(pathname)
+  attr_accessor :asset_mapping
+
+  def assets_dir_for(pathname)
    return nil if pathname.root? || !pathname.exist?
     
     if pathname.directory? && pathname.basename.to_s == 'assets'
@@ -17,8 +24,7 @@ module AssetImporter
    assets_dir_for(pathname.parent)
   end
 
-  def self.import_folder(pathname)
-    asset_mapping = {}
+  def import_folder(pathname)
     assets_dir = assets_dir_for(pathname)
     if !assets_dir
       puts "Directory to import must be under the assets directory"
@@ -34,7 +40,7 @@ module AssetImporter
       else
         begin
           asset = Asset.create! :asset => image.open
-          asset_mapping[filename.to_s.sub(/^\//, '')] = asset
+          @asset_mapping[filename.to_s.sub(/^\//, '')] = asset
         rescue StandardError => e
           puts "Could not create Asset for file #{filename}"
           puts "Reason was: #{e.message}"
@@ -42,11 +48,10 @@ module AssetImporter
       end
     end
     puts "Rewriting URLs in content"
-    rewrite_urls(asset_mapping)
+    rewrite_urls
   end
   
-  def self.rewrite_urls(asset_mapping)
-    @asset_mapping = asset_mapping
+  def rewrite_urls
     [PagePart, Snippet, Layout].each do |klass|
       klass.find_each do |resource|
         fix resource
@@ -56,7 +61,9 @@ module AssetImporter
     end
   end
 
-  def self.fix(resource)
+protected
+
+  def fix(resource)
     resource.content.gsub!(%r{/?(?:\.\./)*(assets/[^'"\n)]+[^'")\s])}) do |asset_path|
       dir, file = File.split($1)
       old_asset = File.join(dir, URI.decode(file))
