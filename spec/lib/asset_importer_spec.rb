@@ -20,6 +20,35 @@ describe AssetImporter do
 
   end
 
+  describe "finding the assets directory" do
+    
+    it "should return the same path if is is the assets dir" do
+      assets = Pathname('public/assets')
+      assets.stub!(:directory?).and_return(true)
+      assets.stub!(:exist?).and_return(true)
+      AssetImporter.assets_dir_for(assets).should == assets
+    end
+    
+    it "should return the parent directory for a child dir" do
+      flash = Pathname('public/assets/flash')
+      flash.stub!(:exist?).and_return(true)
+      flash.stub!(:directory?).and_return(true)
+
+      assets = flash.parent
+      assets.stub!(:directory?).and_return(true)
+      assets.stub!(:exist?).and_return(true)
+
+      flash.should_receive(:parent).and_return(assets)
+      AssetImporter.assets_dir_for(flash).should == assets
+    end
+    
+    it "should return nil if the path isn't within an assets directory" do
+      assets = Pathname('/')
+      AssetImporter.assets_dir_for(assets).should be_nil
+    end
+  
+  end
+
   describe "rewriting asset urls in content" do
 
     before do

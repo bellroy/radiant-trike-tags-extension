@@ -2,15 +2,31 @@ require 'pathname'
 
 module AssetImporter
   # tries to import all files found under +path+ as Paperclipped Asset
-  # returns the saved asset records
+  # assumes that +path+ is under public/assets
   def self.import(path)
     import_folder(Pathname.new(path))
   end
 
+  def self.assets_dir_for(pathname)
+   return nil if pathname.root? || !pathname.exist?
+    
+    if pathname.directory? && pathname.basename.to_s == 'assets'
+      return pathname
+    end
+    
+   assets_dir_for(pathname.parent)
+  end
+
   def self.import_folder(pathname)
     asset_mapping = {}
+    assets_dir = assets_dir_for(pathname)
+    if !assets_dir
+      puts "Directory to import must be under the assets directory"
+      return
+    end
+
     pathname.children.collect do |image|
-      filename = image.relative_path_from(pathname)
+      filename = image.relative_path_from(assets_dir)
       next if filename.to_s =~ /^\./
       if image.directory?
         puts "Importing directory '#{image}'"
@@ -18,7 +34,7 @@ module AssetImporter
       else
         begin
           asset = Asset.create! :asset => image.open
-          asset_mapping[image.to_s.sub(/^\//, '')] = asset
+          asset_mapping[filename.to_s.sub(/^\//, '')] = asset
         rescue StandardError => e
           puts "Could not create Asset for file #{filename}"
           puts "Reason was: #{e.message}"
