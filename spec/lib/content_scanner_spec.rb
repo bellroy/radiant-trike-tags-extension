@@ -13,15 +13,17 @@ describe ContentScanner do
     ContentScanner.replace(:find, :replace)
   end
   describe "#find_replace" do
-    it "should iterate through all PageParts" do
-      PagePart.should_receive(:find).with(:all).and_return([])
-      ContentScanner.find_replace(:find)
-    end
-    it "should search all PagePart #content" do
-      page_part = mock("page_part")
-      page_part.should_receive(:content).at_least(2).times.and_return("")
-      PagePart.stub!(:find).and_return([page_part, page_part])
-      ContentScanner.find_replace("find")
+    [PagePart, Snippet, Layout].each do |klass|
+      it "should iterate through all #{klass}s" do
+        klass.should_receive(:find).with(:all).and_return([])
+        ContentScanner.find_replace("find")
+      end
+      it "should search all #{klass} #content" do
+        obj = mock(klass.to_s.underscore)
+        obj.should_receive(:content).at_least(2).times.and_return("")
+        klass.stub!(:find).and_return([obj, obj])
+        ContentScanner.find_replace("find")
+      end
     end
 
     describe "without replace" do
