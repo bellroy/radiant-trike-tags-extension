@@ -8,14 +8,26 @@ describe AssetImporter do
     @importer = AssetImporter.new
   end
 
-  describe "importing assests from a folder" do
+  describe "importing assets from a folder" do
 
     it "should create an Asset for each file in the directory" do
       pending
       files = [
-        mock(Pathname, :relative_path_from => 'file1')
+        mock(Pathname, :relative_path_from => 'file1', :directory? => false),
+        mock(Pathname, :relative_path_from => 'file2', :directory? => false),
+        mock(Pathname, :relative_path_from => 'dir', :directory? => true, :children => [
+            mock(Pathname, :relative_path_from => 'dir/file1', :directory? => false),
+            mock(Pathname, :relative_path_from => 'dir/file2', :directory? => false),
+          ]),
       ]
-      Pathname.stub!(:new).and_return(mock(Pathanme, :children => files))
+      files.flatten.each {|f| f.stub!(:open).and_return(f) }
+      Pathname.stub!(:new).and_return(mock(Pathname, :children => files,
+                                           :root? => false, :exist? => true, :directory? => true,
+                                           :basename => "assets"))
+
+      Asset.should_receive(:create!).with(*(files.flatten))
+
+      @importer.import("public/assets")
     end
 
     it "should rewrite urls, passing an asset mapping" do
@@ -26,7 +38,7 @@ describe AssetImporter do
 
   describe "finding the assets directory" do
     
-    it "should return the same path if is is the assets dir" do
+    it "should return the same path if it is the assets dir" do
       assets = Pathname('public/assets')
       assets.stub!(:directory?).and_return(true)
       assets.stub!(:exist?).and_return(true)
@@ -139,11 +151,11 @@ describe AssetImporter do
 
     end
 
-    [PagePart, Snippet, Layout].each do |clazz|
-      it "should process all #{clazz.name}s" do
-        resource = clazz.new(:content => '')
+    [PagePart, Snippet, Layout].each do |klass|
+      it "should process all #{klass.name}s" do
+        resource = klass.new(:content => '')
         resource.stub!(:save!)
-        clazz.should_receive(:find_each).and_yield(resource)
+        klass.should_receive(:find_each).and_yield(resource)
         @importer.rewrite_urls
       end
     end
