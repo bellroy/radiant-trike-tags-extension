@@ -74,7 +74,12 @@ describe ": changed standard tags :" do
       end
 
       it "should render a link for the current contextual page" do
-        expected = %{<a href="/first/child/">Child</a> <a href="/first/child-2/">Child 2</a> <a href="/first/child-3/">Child 3</a> }
+        expected = ""
+        if Page.column_names.include?("position")
+          expected = %{<a href="/first/child-2/">Child 2</a> <a href="/first/child-3/">Child 3</a> <a href="/first/child/">Child</a> }
+        else
+          expected = %{<a href="/first/child/">Child</a> <a href="/first/child-2/">Child 2</a> <a href="/first/child-3/">Child 3</a> }
+        end
         page(:first).should render('<r:children:each><r:link /> </r:children:each>' ).as(expected)
       end
 
