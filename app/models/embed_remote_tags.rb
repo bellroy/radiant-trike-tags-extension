@@ -10,6 +10,15 @@ module EmbedRemoteTags
     unless options && options.keys && options.include?("uri")
       raise StandardTags::TagError.new("`embed' tag must contain a `uri' attribute.")
     end
-    Net::HTTP.get(URI.parse(options['uri']))
+
+    begin
+      response = Net::HTTP.get_response(URI.parse(options['uri']))
+      code = response && response.code
+      raise unless code == '200'
+      return response.body
+    rescue Exception
+      tag.context.page.response.headers['Status'] = code || '503'
+      return "This information is temporarily unavailable."
+    end
   end
 end
