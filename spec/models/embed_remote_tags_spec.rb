@@ -45,33 +45,20 @@ describe EmbedRemoteTags do
       before do
         @page.stub! :response => ActionController::TestResponse.new
         @page.parts.first.update_attribute(:content, "<r:embed_remote uri='http://example.com/' />")
+        @response = mock(Net::HTTPResponse, :code => '404', :body => '')
+        Net::HTTP.stub! :get_response => @response
       end
 
-      describe "because of a non-200 status code" do
-        before do
-          @response = mock(Net::HTTPResponse, :code => '404', :body => '')
-          Net::HTTP.stub! :get_response => @response
-        end
+      it_should_behave_like "error fetching content"
 
-        it_should_behave_like "error fetching content"
-
-        it "should set the request response Status header to the same response code" do
-          @page.render
-          @page.response.headers['Status'].should == '404'
-        end
+      it "should set the request response Status header to 503" do
+        @page.render
+        @page.response.headers['Status'].should == '503'
       end
 
-      describe "because of unknown error" do
-        before do
-          Net::HTTP.stub!(:get_response).and_raise(Net::HTTPError.new("Something bad", mock(Net::HTTPResponse)))
-        end
-
-        it_should_behave_like "error fetching content"
-
-        it "should set the request response Status header to Temporarily Unavailable" do
-          @page.render
-          @page.response.headers['Status'].should == '503'
-        end
+      it "should set the cacheability of the page to uncachable" do
+        @page.render
+        @page.should_not be_cache
       end
     end
   end

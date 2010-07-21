@@ -1,3 +1,12 @@
+Page.class_eval do
+  attr_accessor :cacheable
+
+  def cache_with_preference_check?
+    cache_without_preference_check? && cacheable
+  end
+  alias_method_chain :cache?, :preference_check
+end
+
 module EmbedRemoteTags
   include Radiant::Taggable
   desc %{
@@ -17,7 +26,10 @@ module EmbedRemoteTags
       raise unless code == '200'
       return response.body
     rescue Exception
-      tag.context.page.response.headers['Status'] = '503'
+      page = tag.context.page
+      page.cacheable = false
+      page.response.headers['Status'] = '503'
+
       return "This information is temporarily unavailable."
     end
   end
