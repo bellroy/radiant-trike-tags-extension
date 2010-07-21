@@ -1,6 +1,10 @@
 Page.class_eval do
   attr_accessor :cacheable
 
+  def cacheable
+    @cacheable.nil? ? true : @cacheable
+  end
+
   def cache_with_preference_check?
     cache_without_preference_check? && cacheable
   end

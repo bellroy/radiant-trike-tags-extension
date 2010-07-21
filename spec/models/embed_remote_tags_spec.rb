@@ -11,6 +11,17 @@ describe EmbedRemoteTags do
       lambda { @page.render }.should raise_error(StandardTags::TagError)
     end
 
+    describe "patching pages to have cacheing preference" do
+      it "leaves pages cacheable by default" do
+        @page.should be_cache
+      end
+
+      it "respects the cacheability preference" do
+        @page.cacheable = false
+        @page.should_not be_cache
+      end
+    end
+
     it "should parse the uri, and request it" do
       @url = "http://example.com/"
       @uri = URI.parse(@url)
