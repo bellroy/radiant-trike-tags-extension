@@ -17,7 +17,7 @@ module EmbedRemoteTags
       raise unless code == '200'
       return response.body
     rescue Exception
-      tag.context.page.response.headers['Status'] = code || '503'
+      tag.context.page.response.headers['Status'] = '503'
       return "This information is temporarily unavailable."
     end
   end
