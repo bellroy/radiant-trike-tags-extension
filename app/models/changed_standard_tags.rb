@@ -100,7 +100,8 @@ module ChangedStandardTags
     restart = (tag.attr['restart'] || '').split(';')
     limit = tag.attr['limit'].try(:to_i)
     header = tag.expand
-    if header != previous_headers[name] && tag.locals.header_counts[:all] < limit
+    over_limit = limit && tag.locals.header_counts[:all] >= limit
+    if header != previous_headers[name] && !over_limit
       previous_headers[name] = header
       unless restart.empty?
         restart.each do |n|
