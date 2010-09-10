@@ -17,13 +17,13 @@ class AssetImporter
 
   def assets_dir_for(pathname)
    return nil if pathname.to_s.include?("..") || pathname.root? || !pathname.exist?
-   return pathname
+#    return pathname
     
-#     if pathname.directory? && pathname.basename.to_s == 'assets'
-#       return pathname
-#     end
+    if pathname.directory? && pathname.basename.to_s == 'assets'
+      return pathname
+    end
     
-#    assets_dir_for(pathname.parent)
+    assets_dir_for(pathname.parent)
   end
 
   def import_folder(pathname)
