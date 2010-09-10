@@ -18,15 +18,18 @@ module EscapeTags
 
   desc %{
     CSV escapes its contents.
+    By default, <code>swallow_newlines</code> is set to false.
     
     *Usage:*
-    <pre><code><r:escape:csv>some, "content" that, might<br />
+    <pre><code><r:escape:csv [swallow_newlines="true|false"]>some, "content" that, might<br />
 otherwise, cause trouble</r:escape:csv></code></pre>
-    <pre><code> => some, """content"" that", "might<br />
-otherwise", cause trouble</code></pre>
+    <pre><code> => some, """content"" that", "might<br />otherwise", cause trouble</code></pre>
   }
   tag "escape:csv" do |tag|
-    "\"#{tag.expand.gsub(/"/,'""')}\""
+    options = tag.attr.dup
+    ret = tag.expand.gsub(/"/,'""')
+    ret.gsub!(/[\n\r]/,'') if options["swallow_newlines"] && options["swallow_newlines"] == "true"
+    "\"#{ret}\""
   end
 
 end

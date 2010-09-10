@@ -20,14 +20,19 @@ describe ": escape tags :" do
 
   describe "<r:escape:csv />" do
     fixture = {
-      'content' => '"content"',
+      'easy content' => '"easy content"',
       'with "quotes"' => '"with ""quotes"""',
       'with, comma' => '"with, comma"',
+      "with,\nnewline" => "\"with,\nnewline\"",
     }
     fixture.each do |input, output|
       it "should properly escape #{input} to #{output}" do
         @page.should render("<r:escape:csv>#{input}</r:escape:csv>").as(output)
       end
+    end
+
+    it "should escape newlines when swallow_newlines is true" do
+      @page.should render("<r:escape:csv swallow_newlines=\"true\">some\ntext</r:escape:csv>").as('"sometext"')
     end
   end
 end
