@@ -15,6 +15,7 @@ class TrikeTagsExtension < Radiant::Extension
       include EmbedRemoteTags
       include EnvironmentTags
       include ChangedStandardTags
+      include EscapeTags
     end
   end
   
