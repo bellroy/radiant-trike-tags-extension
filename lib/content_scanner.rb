@@ -14,7 +14,7 @@ module ContentScanner
       matches << part
       page = part.page
       if page && replace
-        part.update_attribute(:content, part.content.gsub(find, replace))
+        part.update_attribute(:content, part.content.gsub(Regexp.new(find), replace))
         puts "Replaced match on Page #{page.url} (id:#{page.id}/#{part.name})"
         match_count += 1
       elsif page
